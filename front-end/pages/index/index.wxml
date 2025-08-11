@@ -1,0 +1,107 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="card user-card">
+    <view class="flex flex-between">
+      <view class="flex">
+        <image class="avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill" binderror="onAvatarError"></image>
+        <view class="user-info">
+          <text class="username">{{userInfo.nickname || '微信用户'}}</text>
+          <text class="user-desc">继续加油，距离考试还有 {{examDays || 0}} 天</text>
+        </view>
+      </view>
+      <view class="sign-in" bindtap="signIn">
+        <text class="sign-text">签到</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习统计 -->
+  <view class="stats-container">
+    <view class="stats-card">
+      <view class="stats-item">
+        <text class="stats-number">{{studyStats.totalStudyTime}}</text>
+        <text class="stats-label">学习时长(分钟)</text>
+      </view>
+    </view>
+    <view class="stats-row">
+      <view class="stats-card-small">
+        <text class="stats-number-small">{{studyStats.continuousStudyDays}}</text>
+        <text class="stats-label-small">连续学习(天)</text>
+      </view>
+      <view class="stats-card-small">
+        <text class="stats-number-small">{{studyStats.todayQuestions}}</text>
+        <text class="stats-label-small">今日答题</text>
+      </view>
+      <view class="stats-card-small">
+        <text class="stats-number-small">{{studyStats.correctRate}}%</text>
+        <text class="stats-label-small">正确率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快速操作 -->
+  <view class="card">
+    <view class="title">快速开始</view>
+    <view class="quick-actions">
+      <view class="action-item" bindtap="startStudy">
+        <view class="action-icon study-icon">📚</view>
+        <text class="action-text">开始学习</text>
+      </view>
+      <view class="action-item" bindtap="startPractice">
+        <view class="action-icon practice-icon">✏️</view>
+        <text class="action-text">刷题练习</text>
+      </view>
+      <view class="action-item" bindtap="viewPlan">
+        <view class="action-icon plan-icon">📅</view>
+        <text class="action-text">学习计划</text>
+      </view>
+      <view class="action-item" bindtap="aiChat">
+        <view class="action-icon ai-icon">🤖</view>
+        <text class="action-text">AI答疑</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日任务 -->
+  <view class="card" wx:if="{{todayTasks.length > 0}}">
+    <view class="title">今日任务</view>
+    <view class="task-list">
+      <view class="task-item" wx:for="{{todayTasks}}" wx:key="id" bindtap="completeTask" data-id="{{item.id}}" data-type="{{item.type}}">
+        <view class="task-content">
+          <text class="task-title">{{item.title}}</text>
+          <view class="task-progress">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{item.progress}}%"></view>
+            </view>
+            <text class="progress-text">{{item.progress}}%</text>
+          </view>
+        </view>
+        <view class="task-arrow">></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近学习 -->
+  <view class="card" wx:if="{{recentKnowledge.length > 0}}">
+    <view class="title">最近学习</view>
+    <view class="knowledge-list">
+      <view class="knowledge-item" wx:for="{{recentKnowledge}}" wx:key="id" bindtap="viewKnowledge" data-id="{{item.id}}">
+        <view class="knowledge-content">
+          <text class="knowledge-title">{{item.title}}</text>
+          <text class="knowledge-chapter">{{item.chapter}}</text>
+        </view>
+        <view class="difficulty-tag difficulty-{{item.difficulty}}">
+          <text wx:if="{{item.difficulty === 'easy'}}">简单</text>
+          <text wx:elif="{{item.difficulty === 'medium'}}">中等</text>
+          <text wx:else="{{item.difficulty === 'hard'}}">困难</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

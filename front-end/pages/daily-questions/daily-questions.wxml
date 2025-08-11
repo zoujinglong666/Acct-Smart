@@ -1,0 +1,107 @@
+<!--pages/daily-questions/daily-questions.wxml-->
+<view class="container">
+  <!-- 头部信息 -->
+  <view class="header">
+    <view class="title-section">
+      <text class="title">每日一练</text>
+      <text class="subtitle">坚持练习，提升能力</text>
+    </view>
+    <view class="timer-section">
+      <text class="timer">{{formatTime(timeLeft)}}</text>
+      <text class="timer-label">剩余时间</text>
+    </view>
+  </view>
+
+  <!-- 进度信息 -->
+  <view class="progress-section">
+    <view class="progress-header">
+      <text class="progress-title">答题进度</text>
+      <text class="progress-count">{{currentIndex + 1}}/{{questions.length}}</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{((currentIndex + 1) / questions.length) * 100}}%"></view>
+    </view>
+    <view class="score-info">
+      <text class="score">当前得分：{{score}}/{{currentIndex + (showResult ? 1 : 0)}}</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-section">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载题目中...</text>
+  </view>
+
+  <!-- 题目区域 -->
+  <view wx:elif="{{questions.length > 0}}" class="question-section">
+    <view class="question-header">
+      <view class="question-info">
+        <text class="question-number">第{{currentIndex + 1}}题</text>
+        <view class="question-difficulty difficulty-{{questions[currentIndex].difficulty}}">
+          {{questions[currentIndex].difficulty === 'easy' ? '简单' : questions[currentIndex].difficulty === 'medium' ? '中等' : '困难'}}
+        </view>
+      </view>
+      <view class="question-chapter">{{questions[currentIndex].chapter}}</view>
+    </view>
+    
+    <view class="question-content">
+      <text class="question-text">{{questions[currentIndex].title}}</text>
+    </view>
+
+    <!-- 选择题选项 -->
+    <view class="options-list">
+      <view 
+        wx:for="{{questions[currentIndex].options}}" 
+        wx:key="index"
+        class="option-item {{selectedAnswer === item ? 'selected' : ''}} {{showResult ? (item === questions[currentIndex].correctAnswer ? 'correct' : (selectedAnswer === item ? 'wrong' : '')) : ''}}"
+        bindtap="selectAnswer"
+        data-answer="{{item}}"
+      >
+        <view class="option-key">{{item.charAt(0)}}</view>
+        <text class="option-text">{{item.substring(3)}}</text>
+        <view wx:if="{{showResult && item === questions[currentIndex].correctAnswer}}" class="correct-icon">✓</view>
+        <view wx:if="{{showResult && selectedAnswer === item && item !== questions[currentIndex].correctAnswer}}" class="wrong-icon">✗</view>
+      </view>
+    </view>
+
+    <!-- 答案解析 -->
+    <view wx:if="{{showResult}}" class="explanation-section">
+      <view class="explanation-header">
+        <text class="explanation-title">答案解析</text>
+        <view class="result-badge {{selectedAnswer === questions[currentIndex].correctAnswer ? 'correct' : 'wrong'}}">
+          {{selectedAnswer === questions[currentIndex].correctAnswer ? '回答正确' : '回答错误'}}
+        </view>
+      </view>
+      <text class="explanation-text">{{questions[currentIndex].explanation}}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <view wx:if="{{!showResult}}" class="submit-section">
+        <button class="btn-secondary" bindtap="speakQuestion">🔊 语音播报</button>
+        <button 
+          class="btn-primary {{!selectedAnswer ? 'disabled' : ''}}" 
+          bindtap="submitAnswer"
+          disabled="{{!selectedAnswer}}"
+        >
+          提交答案
+        </button>
+      </view>
+      
+      <view wx:else class="result-buttons">
+        <button wx:if="{{currentIndex > 0}}" class="btn-secondary" bindtap="prevQuestion">上一题</button>
+        <button class="btn-primary" bindtap="nextQuestion">
+          {{currentIndex < questions.length - 1 ? '下一题' : '查看结果'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 控制按钮 -->
+  <view class="control-buttons">
+    <button class="control-btn" bindtap="togglePause">
+      {{timer ? '暂停' : '继续'}}
+    </button>
+    <button class="control-btn" bindtap="restart">重新开始</button>
+  </view>
+</view>

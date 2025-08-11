@@ -1,0 +1,33 @@
+{
+  "name": "acct-smart",
+  "version": "1.0.0",
+  "description": "AI中级会计助手 - 智能学习平台",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd back-end && npm run start:dev",
+    "dev:frontend": "echo '请使用微信开发者工具打开 front-end 目录'",
+    "build": "cd back-end && npm run build",
+    "start": "cd back-end && npm run start:prod",
+    "install:all": "npm install && cd back-end && npm install",
+    "lint": "cd back-end && npm run lint",
+    "test": "cd back-end && npm run test"
+  },
+  "keywords": [
+    "会计",
+    "学习",
+    "AI",
+    "微信小程序",
+    "NestJS",
+    "PostgreSQL"
+  ],
+  "author": "CodeBuddy",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

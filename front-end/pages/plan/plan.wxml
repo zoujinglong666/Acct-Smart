@@ -1,0 +1,216 @@
+<!--pages/plan/plan.wxml-->
+<view class="container">
+  <!-- 当前计划卡片 -->
+  <view class="current-plan-card" wx:if="{{currentPlan}}">
+    <view class="plan-header">
+      <text class="plan-title">{{currentPlan.name}}</text>
+      <view class="plan-status active">进行中</view>
+    </view>
+    
+    <view class="plan-progress">
+      <view class="progress-info">
+        <text class="progress-text">学习进度 {{currentPlan.progress}}%</text>
+        <text class="progress-days">{{currentPlan.studiedDays}}/{{currentPlan.totalDays}}天</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{currentPlan.progress}}%"></view>
+      </view>
+    </view>
+    
+    <view class="plan-info">
+      <view class="info-item">
+        <text class="info-label">目标日期</text>
+        <text class="info-value">{{currentPlan.targetDate}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">每日时长</text>
+        <text class="info-value">{{currentPlan.dailyTime}}分钟</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">剩余天数</text>
+        <text class="info-value">{{calculateRemainingDays(currentPlan.targetDate)}}天</text>
+      </view>
+    </view>
+    
+    <view class="plan-actions">
+      <button class="btn-primary" bindtap="startTodayStudy">开始今日学习</button>
+      <button class="btn-secondary" bindtap="adjustPlan">调整计划</button>
+    </view>
+  </view>
+
+  <!-- 无计划状态 -->
+  <view class="no-plan-card" wx:if="{{!currentPlan}}">
+    <view class="no-plan-icon">📅</view>
+    <text class="no-plan-title">还没有学习计划</text>
+    <text class="no-plan-desc">制定一个适合你的学习计划，让学习更有条理</text>
+    <button class="btn-primary" bindtap="showCreateDialog">创建学习计划</button>
+  </view>
+
+  <!-- 本周学习安排 -->
+  <view class="card" wx:if="{{currentPlan && currentPlan.weeklySchedule}}">
+    <view class="title">本周学习安排</view>
+    <view class="weekly-schedule">
+      <view class="schedule-item {{item.completed ? 'completed' : ''}}" wx:for="{{currentPlan.weeklySchedule}}" wx:key="day">
+        <view class="schedule-day">{{item.day}}</view>
+        <view class="schedule-content">
+          <text class="schedule-subject">{{item.subjects.join('、')}}</text>
+          <text class="schedule-time" wx:if="{{item.time > 0}}">{{item.time}}分钟</text>
+        </view>
+        <view class="schedule-status">
+          <text wx:if="{{item.completed}}" class="status-completed">✓</text>
+          <text wx:else class="status-pending">○</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习进度统计 -->
+  <view class="card" wx:if="{{studyProgress}}">
+    <view class="title">学习统计</view>
+    <view class="stats-grid">
+      <view class="stats-item">
+        <text class="stats-number">{{studyProgress.studiedDays}}</text>
+        <text class="stats-label">已学习天数</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{formatTime(studyProgress.studiedTime)}}</text>
+        <text class="stats-label">累计时长</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{studyProgress.completionRate}}%</text>
+        <text class="stats-label">完成率</text>
+      </view>
+    </view>
+    <button class="btn-secondary full-width" bindtap="viewStudyStats">查看详细统计</button>
+  </view>
+
+  <!-- 里程碑 -->
+  <view class="card" wx:if="{{currentPlan && currentPlan.milestones}}">
+    <view class="title">学习里程碑</view>
+    <view class="milestones">
+      <view class="milestone-item {{item.completed ? 'completed' : ''}}" wx:for="{{currentPlan.milestones}}" wx:key="name">
+        <view class="milestone-icon">
+          <text wx:if="{{item.completed}}">✓</text>
+          <text wx:else>○</text>
+        </view>
+        <view class="milestone-content">
+          <text class="milestone-name">{{item.name}}</text>
+          <text class="milestone-date">目标：{{item.targetDate}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 所有计划列表 -->
+  <view class="card">
+    <view class="section-header">
+      <text class="title">我的计划</text>
+      <button class="btn-add" bindtap="showCreateDialog">+ 新建</button>
+    </view>
+    
+    <view class="plan-list" wx:if="{{planList.length > 0}}">
+      <view class="plan-item" wx:for="{{planList}}" wx:key="id">
+        <view class="plan-item-content" bindtap="viewPlanDetail" data-id="{{item.id}}">
+          <view class="plan-item-header">
+            <text class="plan-item-title">{{item.name}}</text>
+            <view class="plan-item-status {{item.status}}">
+              <text wx:if="{{item.status === 'active'}}">进行中</text>
+              <text wx:elif="{{item.status === 'completed'}}">已完成</text>
+              <text wx:else>草稿</text>
+            </view>
+          </view>
+          <view class="plan-item-info">
+            <text class="plan-item-date">目标：{{item.targetDate}}</text>
+            <text class="plan-item-progress">进度：{{item.progress}}%</text>
+          </view>
+        </view>
+        <view class="plan-item-actions">
+          <button class="action-btn" wx:if="{{item.status !== 'active'}}" bindtap="activatePlan" data-id="{{item.id}}">激活</button>
+          <button class="action-btn" bindtap="editPlan" data-id="{{item.id}}">编辑</button>
+          <button class="action-btn delete" bindtap="deletePlan" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+    
+    <view class="empty-state" wx:if="{{planList.length === 0}}">
+      <text class="empty-text">还没有创建任何计划</text>
+    </view>
+  </view>
+
+  <!-- 创建计划对话框 -->
+  <view class="dialog-overlay" wx:if="{{showCreateDialog}}" bindtap="hideCreateDialog">
+    <view class="dialog" catchtap="">
+      <view class="dialog-header">
+        <text class="dialog-title">创建学习计划</text>
+        <button class="dialog-close" bindtap="hideCreateDialog">×</button>
+      </view>
+      
+      <view class="dialog-content">
+        <!-- 选择模板 -->
+        <view class="form-section">
+          <text class="form-label">选择计划模板</text>
+          <view class="template-list">
+            <view class="template-item {{selectedTemplate === item.id ? 'selected' : ''}}" 
+                  wx:for="{{planTemplates}}" wx:key="id"
+                  bindtap="selectTemplate" data-template="{{item.id}}">
+              <text class="template-name">{{item.name}}</text>
+              <text class="template-desc">{{item.description}}</text>
+              <view class="template-info">
+                <text wx:if="{{item.duration > 0}}">{{item.duration}}天</text>
+                <text>每日{{item.dailyTime}}分钟</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 计划名称 -->
+        <view class="form-section">
+          <text class="form-label">计划名称</text>
+          <input class="form-input" placeholder="请输入计划名称" 
+                 value="{{newPlan.name}}" bindinput="onPlanNameInput" />
+        </view>
+        
+        <!-- 目标日期 -->
+        <view class="form-section">
+          <text class="form-label">目标日期</text>
+          <picker mode="date" value="{{newPlan.targetDate}}" bindchange="onTargetDateChange">
+            <view class="form-input picker">
+              <text wx:if="{{newPlan.targetDate}}">{{newPlan.targetDate}}</text>
+              <text wx:else class="placeholder">请选择目标日期</text>
+            </view>
+          </picker>
+        </view>
+        
+        <!-- 每日学习时间 -->
+        <view class="form-section">
+          <text class="form-label">每日学习时间（分钟）</text>
+          <input class="form-input" type="number" placeholder="60" 
+                 value="{{newPlan.dailyTime}}" bindinput="onDailyTimeInput" />
+        </view>
+        
+        <!-- 选择科目 -->
+        <view class="form-section">
+          <text class="form-label">选择科目</text>
+          <view class="subject-list">
+            <view class="subject-item {{item.selected ? 'selected' : ''}}" 
+                  wx:for="{{subjects}}" wx:key="id"
+                  bindtap="toggleSubject" data-subject="{{item.id}}">
+              <text class="subject-name">{{item.name}}</text>
+              <text class="subject-check">{{item.selected ? '✓' : '○'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="dialog-actions">
+        <button class="btn-secondary" bindtap="hideCreateDialog">取消</button>
+        <button class="btn-primary" bindtap="createPlan">创建计划</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

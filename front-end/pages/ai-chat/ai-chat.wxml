@@ -1,0 +1,183 @@
+<!--pages/ai-chat/ai-chat.wxml-->
+<view class="container">
+  <!-- 聊天头部 -->
+  <view class="chat-header">
+    <view class="ai-avatar">
+      <image src="/images/ai-avatar.png" mode="aspectFill"></image>
+    </view>
+    <view class="ai-info">
+      <text class="ai-name">AI会计助手</text>
+      <text class="ai-status">{{isTyping ? '正在输入...' : '在线'}}</text>
+    </view>
+    <view class="chat-actions">
+      <text class="action-btn" bindtap="clearHistory">清空</text>
+      <text class="action-btn" bindtap="showQuickQuestions">快捷</text>
+    </view>
+  </view>
+
+  <!-- 聊天消息列表 -->
+  <scroll-view 
+    class="chat-messages" 
+    scroll-y 
+    scroll-top="{{scrollTop}}"
+    scroll-into-view="{{scrollIntoView}}"
+    enhanced="{{true}}"
+    show-scrollbar="{{false}}"
+  >
+    <!-- 欢迎消息 -->
+    <view wx:if="{{messages.length === 0}}" class="welcome-section">
+      <view class="welcome-avatar">🤖</view>
+      <text class="welcome-text">你好！我是AI会计助手，有什么会计问题可以问我哦～</text>
+      
+      <!-- 快捷问题 -->
+      <view class="quick-questions">
+        <text class="quick-title">常见问题：</text>
+        <view class="question-tags">
+          <text 
+            wx:for="{{quickQuestions}}" 
+            wx:key="id"
+            class="question-tag"
+            bindtap="sendQuickQuestion"
+            data-question="{{item.question}}"
+          >
+            {{item.title}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="id" class="message-item" id="msg-{{item.id}}">
+      <!-- 用户消息 -->
+      <view wx:if="{{item.type === 'user'}}" class="message user-message">
+        <view class="message-content">
+          <text class="message-text">{{item.content}}</text>
+          <text class="message-time">{{item.time}}</text>
+        </view>
+        <view class="message-avatar">
+          <image src="{{userAvatar}}" mode="aspectFill"></image>
+        </view>
+      </view>
+
+      <!-- AI消息 -->
+      <view wx:else class="message ai-message">
+        <view class="message-avatar">
+          <image src="/images/ai-avatar.png" mode="aspectFill"></image>
+        </view>
+        <view class="message-content">
+          <text class="message-text">{{item.content}}</text>
+          <view class="message-actions">
+            <text class="message-time">{{item.time}}</text>
+            <view class="action-buttons">
+              <text class="action-btn" bindtap="copyMessage" data-content="{{item.content}}">复制</text>
+              <text class="action-btn" bindtap="speakMessage" data-content="{{item.content}}">朗读</text>
+              <text class="action-btn" bindtap="likeMessage" data-id="{{item.id}}">
+                {{item.liked ? '👍' : '👍'}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 正在输入指示器 -->
+    <view wx:if="{{isTyping}}" class="typing-indicator" id="typing">
+      <view class="message-avatar">
+        <image src="/images/ai-avatar.png" mode="aspectFill"></image>
+      </view>
+      <view class="typing-content">
+        <view class="typing-dots">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="input-section">
+    <view class="input-container">
+      <textarea 
+        class="message-input"
+        placeholder="请输入您的问题..."
+        value="{{inputText}}"
+        bindinput="onInputChange"
+        bindconfirm="sendMessage"
+        auto-height
+        maxlength="500"
+        show-confirm-bar="{{false}}"
+      ></textarea>
+      
+      <view class="input-actions">
+        <text class="char-count">{{inputText.length}}/500</text>
+        <view class="action-buttons">
+          <text class="action-btn" bindtap="showVoiceInput">🎤</text>
+          <text class="action-btn" bindtap="showImageInput">📷</text>
+          <button 
+            class="send-btn {{inputText.trim() ? 'active' : ''}}" 
+            bindtap="sendMessage"
+            disabled="{{!inputText.trim() || sending}}"
+          >
+            {{sending ? '发送中' : '发送'}}
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷问题弹窗 -->
+  <view wx:if="{{showQuickModal}}" class="modal-overlay" bindtap="hideQuickQuestions">
+    <view class="quick-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">快捷问题</text>
+        <text class="modal-close" bindtap="hideQuickQuestions">×</text>
+      </view>
+      <scroll-view class="modal-content" scroll-y>
+        <view class="question-categories">
+          <view 
+            wx:for="{{quickCategories}}" 
+            wx:key="id"
+            class="category-section"
+          >
+            <text class="category-title">{{item.title}}</text>
+            <view class="category-questions">
+              <text 
+                wx:for="{{item.questions}}" 
+                wx:key="id"
+                wx:for-item="question"
+                class="question-item"
+                bindtap="sendQuickQuestion"
+                data-question="{{question.question}}"
+              >
+                {{question.title}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 语音输入弹窗 -->
+  <view wx:if="{{showVoiceModal}}" class="modal-overlay" bindtap="hideVoiceInput">
+    <view class="voice-modal" catchtap="">
+      <view class="voice-content">
+        <view class="voice-icon {{isRecording ? 'recording' : ''}}">🎤</view>
+        <text class="voice-text">
+          {{isRecording ? '正在录音...' : '点击开始录音'}}
+        </text>
+        <text class="voice-hint">说出您的问题，我来为您解答</text>
+      </view>
+      <view class="voice-actions">
+        <button class="voice-btn cancel" bindtap="hideVoiceInput">取消</button>
+        <button 
+          class="voice-btn record {{isRecording ? 'stop' : 'start'}}" 
+          bindtap="toggleRecording"
+        >
+          {{isRecording ? '停止录音' : '开始录音'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

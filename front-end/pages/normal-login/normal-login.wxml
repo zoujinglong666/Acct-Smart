@@ -1,0 +1,67 @@
+<!--pages/normal-login/normal-login.wxml-->
+<view class="login-container">
+  <view class="login-card">
+    <!-- 登录标题 -->
+    <view class="login-header">
+      <view class="login-title">普通登录</view>
+      <view class="login-subtitle">使用用户名密码登录</view>
+    </view>
+
+    <!-- 登录表单 -->
+    <form>
+      <!-- 用户名输入 -->
+      <view class="form-group">
+        <label class="form-label">用户名</label>
+        <view class="input-wrapper">
+          <input 
+            class="form-input" 
+            type="text" 
+            placeholder="请输入用户名"
+            value="{{username}}"
+            bindinput="onUsernameInput"
+            maxlength="20"
+          />
+        </view>
+      </view>
+
+      <!-- 密码输入 -->
+      <view class="form-group">
+        <label class="form-label">密码</label>
+        <view class="input-wrapper password-wrapper">
+          <input 
+            class="form-input" 
+            type="{{showPassword ? 'text' : 'password'}}" 
+            placeholder="请输入密码"
+            value="{{password}}"
+            bindinput="onPasswordInput"
+            maxlength="20"
+          />
+          <view class="password-toggle" bindtap="togglePasswordVisibility">
+            {{showPassword ? '🙈' : '👁️'}}
+          </view>
+        </view>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button 
+        class="login-btn {{loading ? 'loading' : ''}}" 
+        bindtap="normalLogin"
+        disabled="{{loading}}"
+      >
+        {{loading ? '登录中...' : '登录'}}
+      </button>
+
+
+      <!-- 注册按钮 -->
+      <button class="register-btn" bindtap="goToRegister">
+        没有账号？立即注册
+      </button>
+
+      <!-- 返回按钮 -->
+      <button class="back-btn" bindtap="goToWechatLogin">
+        返回微信登录
+      </button>
+    </form>
+
+  </view>
+</view>

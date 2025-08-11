@@ -1,0 +1,179 @@
+/* pages/normal-login/normal-login.wxss */
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 600rpx;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.login-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 16rpx;
+}
+
+.login-subtitle {
+  font-size: 28rpx;
+  color: #6B7280;
+}
+
+.form-group {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #374151;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  height: 88rpx;
+  background: #F9FAFB;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  padding: 0 32rpx;
+  font-size: 32rpx;
+  color: #1F2937;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #1E40AF;
+  background: #FFFFFF;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 24rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  font-size: 32rpx;
+}
+
+.login-btn {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(30, 64, 175, 0.3);
+}
+
+.login-btn:active {
+  background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);
+  transform: translateY(2rpx);
+}
+
+.login-btn.loading {
+  background: #9CA3AF;
+  box-shadow: none;
+}
+
+.test-account-btn {
+  width: 100%;
+  height: 72rpx;
+  background: #F3F4F6;
+  color: #6B7280;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  margin-bottom: 32rpx;
+}
+
+.test-account-btn:active {
+  background: #E5E7EB;
+}
+
+.register-btn {
+  width: 100%;
+  height: 72rpx;
+  background: transparent;
+  color: #1E40AF;
+  border: 2rpx solid #1E40AF;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  margin-bottom: 32rpx;
+}
+
+.register-btn:active {
+  background: rgba(30, 64, 175, 0.1);
+}
+
+.back-btn {
+  width: 100%;
+  height: 72rpx;
+  background: transparent;
+  color: #6B7280;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}
+
+.back-btn:active {
+  background: #F9FAFB;
+}
+
+.tips {
+  margin-top: 40rpx;
+  padding: 24rpx;
+  background: #FEF3C7;
+  border-radius: 12rpx;
+  border-left: 4rpx solid #F59E0B;
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #92400E;
+  margin-bottom: 12rpx;
+}
+
+.tips-content {
+  font-size: 24rpx;
+  color: #92400E;
+  line-height: 1.5;
+}
+
+.tips-account {
+  margin-top: 12rpx;
+  font-family: monospace;
+}

@@ -1,0 +1,54 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/test/test",
+    "pages/login/login",
+    "pages/normal-login/normal-login",
+    "pages/register/register",
+    "pages/daily-questions/daily-questions",
+    "pages/study/study",
+    "pages/knowledge/knowledge",
+    "pages/practice/practice",
+    "pages/exam/exam",
+    "pages/wrong/wrong",
+    "pages/profile/profile",
+    "pages/plan/plan",
+    "pages/ai-chat/ai-chat"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1E40AF",
+    "navigationBarTitleText": "AI中级会计助手",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F3F4F6"
+  },
+  "tabBar": {
+    "color": "#6B7280",
+    "selectedColor": "#1E40AF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/study/study",
+        "text": "学习"
+      },
+      {
+        "pagePath": "pages/practice/practice",
+        "text": "练习"
+      },
+      {
+        "pagePath": "pages/wrong/wrong",
+        "text": "错题"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}
