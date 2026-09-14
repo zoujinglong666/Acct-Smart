@@ -1,0 +1,115 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:else>
+    <!-- 用户信息卡片 -->
+    <view class="user-card">
+      <view class="user-header" bindtap="handleAvatarTap">
+        <image class="user-avatar" 
+               src="{{userInfo ? userInfo.avatar : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiNFNUU3RUIiLz4KPGNpcmNsZSBjeD0iNDAiIGN5PSIzMiIgcj0iMTIiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTIwIDY4QzIwIDU2IDI4IDQ4IDQwIDQ4UzYwIDU2IDYwIDY4IiBmaWxsPSIjOUNBM0FGIi8+Cjwvc3ZnPgo='}}" 
+               mode="aspectFill" />
+        <view class="user-info">
+          <text class="user-name">{{userInfo ? userInfo.nickname : '点击登录'}}</text>
+          <view wx:if="{{userInfo}}" class="user-level">
+            <text class="level-text">{{getLevelInfo().levelName}} Lv.{{getLevelInfo().level}}</text>
+            <text class="user-points">{{studyStats.points}}积分</text>
+          </view>
+          <text wx:else class="login-tip">登录后查看学习数据</text>
+        </view>
+        <view class="user-actions">
+          <button wx:if="{{userInfo}}" class="check-in-btn" bindtap="checkIn">签到</button>
+          <view class="arrow">></view>
+        </view>
+      </view>
+
+      <!-- 学习统计 -->
+      <view wx:if="{{userInfo}}" class="stats-section">
+        <view class="stats-grid">
+          <view class="stat-item" bindtap="goToStudyRecord">
+            <text class="stat-number">{{formatStudyTime(studyStats.totalStudyTime)}}</text>
+            <text class="stat-label">学习时长</text>
+          </view>
+          <view class="stat-item" bindtap="viewRanking">
+            <text class="stat-number">{{studyStats.continuousStudyDays}}</text>
+            <text class="stat-label">连续天数</text>
+          </view>
+          <view class="stat-item" bindtap="goToStudyRecord">
+            <text class="stat-number">{{studyStats.totalQuestions}}</text>
+            <text class="stat-label">答题总数</text>
+          </view>
+          <view class="stat-item" bindtap="viewRanking">
+            <text class="stat-number">{{studyStats.correctRate}}%</text>
+            <text class="stat-label">正确率</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 成就展示 -->
+    <view wx:if="{{achievements.length > 0}}" class="achievements-section">
+      <view class="section-header">
+        <text class="section-title">最近成就</text>
+        <text class="section-more" bindtap="goToAchievements">查看全部 ></text>
+      </view>
+      <scroll-view class="achievements-scroll" scroll-x="true">
+        <view class="achievements-list">
+          <view class="achievement-item {{item.unlocked ? 'unlocked' : 'locked'}}" 
+                wx:for="{{achievements}}" wx:key="id">
+            <view class="achievement-icon">{{item.icon}}</view>
+            <text class="achievement-name">{{item.name}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 功能菜单 -->
+    <view class="menu-section">
+      <view class="menu-list">
+        <view class="menu-item" wx:for="{{menuItems}}" wx:key="id" 
+              bindtap="handleMenuTap" data-id="{{item.id}}">
+          <view class="menu-icon">{{item.icon}}</view>
+          <view class="menu-content">
+            <text class="menu-name">{{item.name}}</text>
+            <text class="menu-desc">{{item.desc}}</text>
+          </view>
+          <view class="menu-arrow">></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他功能 -->
+    <view class="other-section">
+      <view class="other-list">
+        <view class="other-item" bindtap="shareApp">
+          <view class="other-icon">📤</view>
+          <text class="other-name">分享应用</text>
+          <view class="other-arrow">></view>
+        </view>
+        <view class="other-item" bindtap="contactService">
+          <view class="other-icon">💬</view>
+          <text class="other-name">联系客服</text>
+          <view class="other-arrow">></view>
+        </view>
+        <view class="other-item" bindtap="aboutUs">
+          <view class="other-icon">ℹ️</view>
+          <text class="other-name">关于我们</text>
+          <view class="other-arrow">></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 退出登录 -->
+    <view wx:if="{{userInfo}}" class="logout-section">
+      <button class="logout-btn" bindtap="logout">退出登录</button>
+    </view>
+
+    <!-- 版本信息 -->
+    <view class="version-info">
+      <text class="version-text">AI中级会计助手 v1.0.0</text>
+    </view>
+  </view>
+</view>

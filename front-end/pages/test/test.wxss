@@ -1,0 +1,289 @@
+/* pages/test/test.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 页面标题 */
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+  padding: 30rpx 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  color: white;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+/* 用户状态 */
+.user-status {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.status-item:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.value {
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.value.success {
+  color: #52c41a;
+}
+
+.value.error {
+  color: #ff4d4f;
+}
+
+/* 测试按钮组 */
+.test-buttons {
+  margin-bottom: 30rpx;
+}
+
+.test-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: white;
+  color: #333;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.test-btn:hover {
+  background: #f8f9fa;
+  border-color: #d0d7de;
+}
+
+.test-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.test-btn.primary:hover {
+  opacity: 0.9;
+}
+
+.test-btn[disabled] {
+  opacity: 0.6;
+  background: #f5f5f5;
+  color: #999;
+}
+
+/* 批量操作 */
+.batch-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.batch-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: white;
+  color: #333;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.batch-btn.primary {
+  background: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+.batch-btn.danger {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
+
+.batch-btn[disabled] {
+  opacity: 0.6;
+  background: #f5f5f5;
+  color: #999;
+}
+
+/* 测试结果 */
+.results-section {
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  padding: 30rpx;
+  background: #fafafa;
+  border-bottom: 2rpx solid #f0f0f0;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.results-list {
+  max-height: 800rpx;
+  overflow-y: auto;
+}
+
+.result-item {
+  padding: 30rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.timestamp {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.result-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  font-size: 24rpx;
+  color: #1890ff;
+  padding: 8rpx 16rpx;
+  background: #f0f8ff;
+  border-radius: 8rpx;
+}
+
+.result-message {
+  margin-bottom: 15rpx;
+}
+
+.result-message text {
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.result-message .success {
+  color: #52c41a;
+}
+
+.result-message .error {
+  color: #ff4d4f;
+}
+
+.result-message .info {
+  color: #1890ff;
+}
+
+.result-data {
+  background: #f8f9fa;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  border-left: 6rpx solid #1890ff;
+}
+
+.data-preview {
+  font-size: 24rpx;
+  color: #666;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
+.empty-text {
+  font-size: 28rpx;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  padding: 60rpx 80rpx;
+  border-radius: 20rpx;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 32rpx;
+  color: #333;
+}
+
+/* 响应式适配 */
+@media (max-width: 750rpx) {
+  .batch-actions {
+    flex-direction: column;
+  }
+  
+  .batch-btn {
+    margin-bottom: 20rpx;
+  }
+  
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15rpx;
+  }
+}

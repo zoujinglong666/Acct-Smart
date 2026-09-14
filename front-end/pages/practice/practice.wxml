@@ -1,0 +1,170 @@
+<!--pages/practice/practice.wxml-->
+<view class="container">
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 练习类型选择 -->
+  <view wx:elif="{{!questions.length && !showResult}}" class="practice-selection">
+    <view class="title">选择练习模式</view>
+    
+    <view class="practice-types">
+      <view class="practice-type" wx:for="{{practiceTypes}}" wx:key="id" 
+            bindtap="selectPracticeType" data-type="{{item.id}}">
+        <view class="practice-icon">{{item.icon}}</view>
+        <view class="practice-info">
+          <text class="practice-name">{{item.name}}</text>
+          <text class="practice-desc">{{item.desc}}</text>
+        </view>
+        <view class="practice-arrow">></view>
+      </view>
+    </view>
+
+    <!-- 章节选择 -->
+    <view wx:if="{{practiceMode === 'chapter'}}" class="chapter-selection">
+      <view class="subtitle">选择章节</view>
+      <view class="chapters">
+        <view class="chapter-item {{selectedChapter && selectedChapter.id === item.id ? 'selected' : ''}}" 
+              wx:for="{{chapters}}" wx:key="id" 
+              bindtap="selectChapter" data-chapter="{{item}}">
+          <view class="chapter-info">
+            <text class="chapter-name">{{item.name}}</text>
+            <text class="chapter-count">{{item.questionCount}}道题</text>
+          </view>
+          <view class="chapter-check" wx:if="{{selectedChapter && selectedChapter.id === item.id}}">✓</view>
+        </view>
+      </view>
+      
+      <button wx:if="{{selectedChapter}}" class="btn-primary start-btn" bindtap="startChapterPractice">
+        开始练习
+      </button>
+    </view>
+  </view>
+
+  <!-- 练习进行中 -->
+  <view wx:elif="{{questions.length && !showResult}}" class="practice-session">
+    <!-- 顶部信息栏 -->
+    <view class="practice-header">
+      <view class="progress-info">
+        <text class="question-number">{{currentIndex + 1}}/{{questions.length}}</text>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{((currentIndex + 1) / questions.length) * 100}}%"></view>
+        </view>
+      </view>
+      <view class="time-info">
+        <text class="time-left">{{formatTime(timeLeft)}}</text>
+      </view>
+    </view>
+
+    <!-- 题目内容 -->
+    <view class="question-content">
+      <view class="question-header">
+        <view class="question-type">{{currentQuestion.type === 'single' ? '单选题' : '多选题'}}</view>
+        <view class="question-points">{{currentQuestion.points}}分</view>
+        <view class="difficulty-tag difficulty-{{currentQuestion.difficulty}}">
+          <text wx:if="{{currentQuestion.difficulty === 'easy'}}">简单</text>
+          <text wx:elif="{{currentQuestion.difficulty === 'medium'}}">中等</text>
+          <text wx:else="{{currentQuestion.difficulty === 'hard'}}">困难</text>
+        </view>
+      </view>
+
+      <view class="question-text">{{currentQuestion.content}}</view>
+
+      <!-- 选项 -->
+      <view class="options">
+        <view class="option {{userAnswers[currentIndex] === item.key || (Array.isArray(userAnswers[currentIndex]) && userAnswers[currentIndex].indexOf(item.key) > -1) ? 'selected' : ''}}" 
+              wx:for="{{currentQuestion.options}}" wx:key="key" 
+              bindtap="selectAnswer" data-option="{{item.key}}">
+          <view class="option-key">{{item.key}}</view>
+          <view class="option-text">{{item.text}}</view>
+          <view class="option-check" wx:if="{{userAnswers[currentIndex] === item.key || (Array.isArray(userAnswers[currentIndex]) && userAnswers[currentIndex].indexOf(item.key) > -1)}}">✓</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作栏 -->
+    <view class="practice-footer">
+      <view class="navigation">
+        <button class="nav-btn" bindtap="prevQuestion" disabled="{{currentIndex === 0}}">上一题</button>
+        <button class="nav-btn" bindtap="nextQuestion" disabled="{{currentIndex === questions.length - 1}}">下一题</button>
+      </view>
+      
+      <button class="btn-primary submit-btn" bindtap="submitPractice">
+        {{currentIndex === questions.length - 1 ? '提交答案' : '提交练习'}}
+      </button>
+    </view>
+
+    <!-- 题目导航 -->
+    <view class="question-nav">
+      <view class="nav-title">题目导航</view>
+      <view class="nav-grid">
+        <view class="nav-item {{currentIndex === index ? 'current' : ''}} {{isQuestionAnswered(index) ? 'answered' : ''}}" 
+              wx:for="{{questions}}" wx:key="id" wx:for-index="index"
+              bindtap="goToQuestion" data-index="{{index}}">
+          {{index + 1}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 练习结果 -->
+  <view wx:elif="{{showResult}}" class="practice-result">
+    <view class="result-header">
+      <view class="result-icon">🎉</view>
+      <view class="result-title">练习完成</view>
+      <view class="result-score">{{practiceResult.accuracy}}%</view>
+    </view>
+
+    <view class="result-stats">
+      <view class="stat-item">
+        <text class="stat-number">{{practiceResult.correctCount}}</text>
+        <text class="stat-label">答对题数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{practiceResult.wrongCount}}</text>
+        <text class="stat-label">答错题数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{practiceResult.earnedPoints}}</text>
+        <text class="stat-label">获得分数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{formatTime(practiceResult.timeUsed)}}</text>
+        <text class="stat-label">用时</text>
+      </view>
+    </view>
+
+    <!-- 错题列表 -->
+    <view class="wrong-questions" wx:if="{{practiceResult.wrongCount > 0}}">
+      <view class="section-title">错题回顾</view>
+      <view class="wrong-list">
+        <view class="wrong-item" wx:for="{{questions}}" wx:key="id" wx:for-index="index" 
+              wx:if="{{!checkAnswer(item, userAnswers[index])}}">
+          <view class="wrong-header">
+            <text class="wrong-number">第{{index + 1}}题</text>
+            <button class="explanation-btn" bindtap="viewExplanation" data-index="{{index}}">查看解析</button>
+          </view>
+          <view class="wrong-content">{{item.content}}</view>
+          <view class="wrong-answers">
+            <view class="answer-item">
+              <text class="answer-label">你的答案：</text>
+              <text class="answer-value error">{{getUserAnswerText(index)}}</text>
+            </view>
+            <view class="answer-item">
+              <text class="answer-label">正确答案：</text>
+              <text class="answer-value correct">{{Array.isArray(item.correctAnswer) ? item.correctAnswer.join(', ') : item.correctAnswer}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="result-actions">
+      <button class="btn-secondary" bindtap="restartPractice">重新练习</button>
+      <button class="btn-primary" bindtap="viewDetailResult">查看详情</button>
+      <button class="btn-secondary" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+</view>

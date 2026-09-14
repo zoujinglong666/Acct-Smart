@@ -1,0 +1,165 @@
+<!--pages/wrong/wrong.wxml-->
+<view class="container">
+  <!-- 统计卡片 -->
+  <view class="stats-section">
+    <view class="stats-card">
+      <view class="stats-item">
+        <text class="stats-number">{{statistics.total}}</text>
+        <text class="stats-label">总错题</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{statistics.solved}}</text>
+        <text class="stats-label">已掌握</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{statistics.unsolved}}</text>
+        <text class="stats-label">未掌握</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{statistics.recentWeek}}</text>
+        <text class="stats-label">本周新增</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索和筛选 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <input class="search-input" placeholder="搜索错题..." bindinput="onSearch" />
+    </view>
+    
+    <view class="filter-section">
+      <view class="filter-tabs">
+        <view class="filter-tab {{currentFilter === 'all' ? 'active' : ''}}" 
+              bindtap="switchFilter" data-filter="all">
+          <text>全部</text>
+        </view>
+        <view class="filter-tab {{currentFilter === 'recent' ? 'active' : ''}}" 
+              bindtap="switchFilter" data-filter="recent">
+          <text>最近</text>
+        </view>
+        <view class="filter-tab {{currentFilter === 'frequent' ? 'active' : ''}}" 
+              bindtap="switchFilter" data-filter="frequent">
+          <text>常错</text>
+        </view>
+        <view class="filter-tab {{currentFilter === 'unsolved' ? 'active' : ''}}" 
+              bindtap="switchFilter" data-filter="unsolved">
+          <text>未掌握</text>
+        </view>
+      </view>
+      
+      <view class="filter-actions">
+        <button class="filter-btn" bindtap="toggleFilterPanel">筛选</button>
+        <button class="sort-btn" bindtap="switchSort" data-sort="createTime">时间</button>
+        <button class="sort-btn" bindtap="switchSort" data-sort="wrongCount">错误次数</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section">
+    <button class="btn-primary" bindtap="practiceWrongQuestions">开始练习</button>
+    <button class="btn-secondary" bindtap="toggleSelectMode">
+      {{isSelectMode ? '取消选择' : '批量操作'}}
+    </button>
+  </view>
+
+  <!-- 批量操作栏 -->
+  <view class="batch-actions" wx:if="{{isSelectMode}}">
+    <view class="batch-info">
+      <text>已选择 {{selectedQuestions.length}} 题</text>
+      <button class="select-all-btn" bindtap="toggleSelectAll">
+        {{selectedQuestions.length === filteredQuestions.length ? '取消全选' : '全选'}}
+      </button>
+    </view>
+    <view class="batch-buttons">
+      <button class="batch-btn delete" bindtap="batchDelete">删除</button>
+      <button class="batch-btn solved" bindtap="batchMarkSolved">标记已掌握</button>
+    </view>
+  </view>
+
+  <!-- 错题列表 -->
+  <view class="question-list">
+    <view class="question-item" wx:for="{{filteredQuestions}}" wx:key="id">
+      <!-- 选择框 -->
+      <view class="question-checkbox" wx:if="{{isSelectMode}}" 
+            bindtap="selectQuestion" data-id="{{item.id}}">
+        <text class="checkbox {{selectedQuestions.indexOf(item.id) > -1 ? 'checked' : ''}}">
+          {{selectedQuestions.indexOf(item.id) > -1 ? '✓' : '○'}}
+        </text>
+      </view>
+      
+      <!-- 题目内容 -->
+      <view class="question-content" bindtap="viewQuestion" data-id="{{item.id}}">
+        <view class="question-header">
+          <text class="question-title">{{item.question.content}}</text>
+          <view class="question-tags">
+            <text class="difficulty-tag difficulty-{{item.question.difficulty}}">
+              {{item.question.difficulty === 'easy' ? '简单' : 
+                item.question.difficulty === 'medium' ? '中等' : '困难'}}
+            </text>
+            <text class="wrong-count-tag">错{{item.wrongCount}}次</text>
+          </view>
+        </view>
+        
+        <view class="question-info">
+          <text class="question-chapter">{{item.question.chapter || '综合练习'}}</text>
+          <text class="question-date">{{item.createTime}}</text>
+        </view>
+        
+        <view class="question-status">
+          <text class="status-text {{item.isSolved ? 'solved' : 'unsolved'}}">
+            {{item.isSolved ? '已掌握' : '未掌握'}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredQuestions.length === 0 && !loading}}">
+    <view class="empty-icon">📝</view>
+    <text class="empty-title">暂无错题</text>
+    <text class="empty-desc">完成练习后，错题会显示在这里</text>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view class="filter-panel" wx:if="{{showFilterPanel}}">
+    <view class="panel-overlay" bindtap="toggleFilterPanel"></view>
+    <view class="panel-content">
+      <view class="panel-header">
+        <text class="panel-title">筛选条件</text>
+        <button class="panel-close" bindtap="toggleFilterPanel">×</button>
+      </view>
+      
+      <view class="panel-body">
+        <view class="filter-group">
+          <text class="group-title">按分类筛选</text>
+          <view class="category-list">
+            <view class="category-item {{selectedCategory === '' ? 'active' : ''}}" 
+                  bindtap="selectCategory" data-category="">
+              <text>全部分类</text>
+            </view>
+            <view class="category-item {{selectedCategory === item.id ? 'active' : ''}}" 
+                  wx:for="{{categories}}" wx:key="id"
+                  bindtap="selectCategory" data-category="{{item.id}}">
+              <text>{{item.name}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <button class="action-btn" bindtap="exportWrongQuestions">导出错题</button>
+    <button class="action-btn" bindtap="getAIAnalysis">AI分析</button>
+    <button class="action-btn" bindtap="speakStatistics">语音播报</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>
