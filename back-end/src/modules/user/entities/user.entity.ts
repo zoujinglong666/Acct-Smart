@@ -2,8 +2,6 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { StudyRecord } from '../../study/entities/study-record.entity';
 import { WrongQuestion } from '../../study/entities/wrong-question.entity';
-import { StudyPlan } from '../../study/entities/study-plan.entity';
-import { ExamRecord } from '../../exam/entities/exam-record.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -65,10 +63,4 @@ export class User extends BaseEntity {
 
   @OneToMany(() => WrongQuestion, wrongQuestion => wrongQuestion.user)
   wrongQuestions: WrongQuestion[];
-
-  @OneToMany(() => StudyPlan, plan => plan.user)
-  studyPlans: StudyPlan[];
-
-  @OneToMany(() => ExamRecord, record => record.user)
-  examRecords: ExamRecord[];
 }

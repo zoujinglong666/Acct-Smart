@@ -11,7 +11,8 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const study_record_entity_1 = require("./entities/study-record.entity");
 const wrong_question_entity_1 = require("./entities/wrong-question.entity");
-const study_plan_entity_1 = require("./entities/study-plan.entity");
+const study_controller_1 = require("./study.controller");
+const study_service_1 = require("./study.service");
 let StudyModule = class StudyModule {
 };
 exports.StudyModule = StudyModule;
@@ -20,11 +21,12 @@ exports.StudyModule = StudyModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([
                 study_record_entity_1.StudyRecord,
-                wrong_question_entity_1.WrongQuestion,
-                study_plan_entity_1.StudyPlan
+                wrong_question_entity_1.WrongQuestion
             ])
         ],
-        exports: [typeorm_1.TypeOrmModule]
+        controllers: [study_controller_1.StudyController],
+        providers: [study_service_1.StudyService],
+        exports: [study_service_1.StudyService, typeorm_1.TypeOrmModule]
     })
 ], StudyModule);
 //# sourceMappingURL=study.module.js.map

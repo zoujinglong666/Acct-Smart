@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -9,33 +9,31 @@ import { User } from '../user/entities/user.entity';
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
+  /**
+   * 获取每日题目
+   */
   @Get('daily')
   async getDailyQuestions(@GetUser() user: User) {
     return this.questionService.getDailyQuestions(user.id);
   }
 
-  @Get('wrong')
-  async getWrongQuestions(@GetUser() user: User) {
-    return this.questionService.getWrongQuestions(user.id);
-  }
-
-  @Get('high-frequency')
-  async getHighFrequencyWrongQuestions(@GetUser() user: User) {
-    return this.questionService.getHighFrequencyWrongQuestions(user.id);
-  }
-
+  /**
+   * 根据知识点获取题目（章节练习）
+   */
   @Get('by-knowledge-point/:knowledgePointId')
   async getQuestionsByKnowledgePoint(@Param('knowledgePointId') knowledgePointId: string) {
     return this.questionService.getQuestionsByKnowledgePoint(knowledgePointId);
   }
 
+  /**
+   * 提交答案
+   */
   @Post('answer')
   async submitAnswer(
     @GetUser() user: User,
     @Body() answerData: {
       questionId: string;
       userAnswer: string;
-      isCorrect: boolean;
       timeSpent: number;
     }
   ) {
@@ -43,16 +41,21 @@ export class QuestionController {
       user.id,
       answerData.questionId,
       answerData.userAnswer,
-      answerData.isCorrect,
       answerData.timeSpent
     );
   }
 
+  /**
+   * 获取题目解析
+   */
   @Get('analysis/:questionId')
   async getQuestionAnalysis(@Param('questionId') questionId: string) {
     return this.questionService.getQuestionAnalysis(questionId);
   }
 
+  /**
+   * 搜索题目
+   */
   @Get('search')
   async searchQuestions(
     @Query('keyword') keyword: string,

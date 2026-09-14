@@ -22,7 +22,7 @@ __decorate([
     __metadata("design:type", Number)
 ], StudyRecord.prototype, "userId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, comment: '题目ID' }),
+    (0, typeorm_1.Column)({ comment: '题目ID' }),
     __metadata("design:type", Number)
 ], StudyRecord.prototype, "questionId", void 0);
 __decorate([
@@ -38,37 +38,9 @@ __decorate([
     __metadata("design:type", Number)
 ], StudyRecord.prototype, "timeSpent", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'enum', enum: ['practice', 'exam', 'daily', 'knowledge'], default: 'practice', comment: '学习类型' }),
+    (0, typeorm_1.Column)({ type: 'enum', enum: ['practice', 'daily'], default: 'practice', comment: '练习类型' }),
     __metadata("design:type", String)
 ], StudyRecord.prototype, "type", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true, comment: '目标ID（题目ID或知识点ID）' }),
-    __metadata("design:type", String)
-], StudyRecord.prototype, "targetId", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0, comment: '学习时长（分钟）' }),
-    __metadata("design:type", Number)
-], StudyRecord.prototype, "studyTime", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0, comment: '完成题目数' }),
-    __metadata("design:type", Number)
-], StudyRecord.prototype, "completedQuestions", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0, comment: '正确率（百分比）' }),
-    __metadata("design:type", Number)
-], StudyRecord.prototype, "accuracy", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: () => 'CURRENT_DATE', comment: '学习日期' }),
-    __metadata("design:type", Date)
-], StudyRecord.prototype, "studyDate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0, comment: '学习进度（百分比）' }),
-    __metadata("design:type", Number)
-], StudyRecord.prototype, "progress", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true, comment: '考试记录ID' }),
-    __metadata("design:type", Number)
-], StudyRecord.prototype, "examRecordId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.User, user => user.studyRecords),
     (0, typeorm_1.JoinColumn)({ name: 'userId' }),

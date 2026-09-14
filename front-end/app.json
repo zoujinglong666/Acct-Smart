@@ -1,19 +1,10 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/test/test",
     "pages/login/login",
-    "pages/normal-login/normal-login",
-    "pages/register/register",
-    "pages/daily-questions/daily-questions",
-    "pages/study/study",
-    "pages/knowledge/knowledge",
     "pages/practice/practice",
-    "pages/exam/exam",
     "pages/wrong/wrong",
-    "pages/profile/profile",
-    "pages/plan/plan",
-    "pages/ai-chat/ai-chat"
+    "pages/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -31,10 +22,6 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页"
-      },
-      {
-        "pagePath": "pages/study/study",
-        "text": "学习"
       },
       {
         "pagePath": "pages/practice/practice",

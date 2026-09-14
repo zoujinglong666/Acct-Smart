@@ -1,8 +1,6 @@
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { StudyRecord } from '../../study/entities/study-record.entity';
 import { WrongQuestion } from '../../study/entities/wrong-question.entity';
-import { StudyPlan } from '../../study/entities/study-plan.entity';
-import { ExamRecord } from '../../exam/entities/exam-record.entity';
 export declare class User extends BaseEntity {
     openid: string;
     unionid: string;
@@ -26,6 +24,4 @@ export declare class User extends BaseEntity {
     isActive: boolean;
     studyRecords: StudyRecord[];
     wrongQuestions: WrongQuestion[];
-    studyPlans: StudyPlan[];
-    examRecords: ExamRecord[];
 }

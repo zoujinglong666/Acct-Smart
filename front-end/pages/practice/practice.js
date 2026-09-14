@@ -1,235 +1,227 @@
-// pages/practice/practice.js
+// pages/practice/practice.js - 刷题闭环（每日练习 / 章节练习 / 错题重练）
 const app = getApp();
 
 Page({
   data: {
-    practiceMode: 'daily', // daily, chapter, exam, wrong
+    mode: 'daily',            // daily | chapter | wrong
+    loading: true,
+    // 章节列表
+    knowledgePoints: [],
+    selectedKnowledgeId: '',
+    // 答题
     questions: [],
     currentIndex: 0,
     currentQuestion: null,
-    userAnswers: {},
-    timeLeft: 0,
-    timer: null,
-    isSubmitted: false,
-    showResult: false,
-    practiceResult: null,
-    loading: true,
-    practiceTypes: [
-      { id: 'daily', name: '每日练习', desc: '精选5道题目', icon: '📅' },
-      { id: 'chapter', name: '章节练习', desc: '按章节分类练习', icon: '📚' },
-      { id: 'exam', name: '模拟考试', desc: '完整考试体验', icon: '📝' },
-      { id: 'wrong', name: '错题练习', desc: '针对性练习', icon: '❌' }
-    ],
-    chapters: [
-      { id: 1, name: '第一章 总论', questionCount: 45 },
-      { id: 2, name: '第二章 存货', questionCount: 38 },
-      { id: 3, name: '第三章 固定资产', questionCount: 52 },
-      { id: 4, name: '第四章 投资性房地产', questionCount: 28 },
-      { id: 5, name: '第五章 长期股权投资', questionCount: 41 }
-    ],
-    selectedChapter: null,
-    practiceSettings: {
-      questionCount: 10,
-      timeLimit: 30, // 分钟
-      showAnswer: true,
-      randomOrder: true
-    }
+    selectedAnswer: '',
+    result: null,             // 本题结果 {isCorrect, correctAnswer, explanation}
+    correctCount: 0,
+    startTime: null,
+    timeUsed: 0,
+    finished: false
   },
 
   onLoad(options) {
-    if (options.mode) {
-      this.setData({ practiceMode: options.mode });
-    }
-    if (options.sessionId) {
-      this.loadPracticeSession(options.sessionId);
+    const mode = options.mode || 'daily';
+    this.setData({ mode });
+
+    if (options.mode === 'chapter') {
+      this.loadKnowledgePoints();
+    } else if (options.mode === 'wrong') {
+      this.loadWrongQuestions();
     } else {
-      this.setData({ loading: false });
+      this.loadDailyQuestions();
     }
   },
 
   onUnload() {
-    this.clearTimer();
+    if (this.timer) clearInterval(this.timer);
   },
 
-  // 加载练习会话
-  async loadPracticeSession(sessionId) {
-    try {
-      // 模拟加载练习会话数据
-      const mockSession = {
-        id: sessionId,
-        questions: this.generateMockQuestions(10),
-        timeLimit: 30,
-        startTime: Date.now()
-      };
+  // ============ 题目加载 ============
 
+  // 每日练习
+  async loadDailyQuestions() {
+    try {
+      app.showLoading('加载题目中...');
+      const questions = await app.api.questionApi.getDailyQuestions();
+      this.prepareQuestions(questions || []);
+    } catch (error) {
+      console.error('加载每日题目失败:', error);
+      app.showToast('加载题目失败');
+      this.setData({ loading: false });
+    } finally {
+      app.hideLoading();
+    }
+  },
+
+  // 章节练习 - 加载知识点列表
+  async loadKnowledgePoints() {
+    try {
+      app.showLoading('加载章节中...');
+      const list = await app.api.knowledgeApi.getKnowledgePoints();
       this.setData({
-        questions: mockSession.questions,
-        currentQuestion: mockSession.questions[0],
-        timeLeft: mockSession.timeLimit * 60,
+        knowledgePoints: list || [],
         loading: false
       });
-
-      this.startTimer();
     } catch (error) {
-      console.error('加载练习会话失败:', error);
+      console.error('加载章节失败:', error);
+      app.showToast('加载章节失败');
       this.setData({ loading: false });
-      app.showToast('加载失败');
+    } finally {
+      app.hideLoading();
     }
   },
 
-  // 生成模拟题目
-  generateMockQuestions(count) {
-    const questions = [];
-    const types = ['single', 'multiple'];
-    const difficulties = ['easy', 'medium', 'hard'];
-    
-    for (let i = 0; i < count; i++) {
-      const type = types[Math.floor(Math.random() * types.length)];
-      const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
-      
-      questions.push({
-        id: i + 1,
-        type: type,
-        difficulty: difficulty,
-        content: `这是第${i + 1}道${type === 'single' ? '单选' : '多选'}题目，难度为${difficulty}。请根据会计准则选择正确答案。`,
-        options: [
-          { key: 'A', text: '选项A：这是一个选项' },
-          { key: 'B', text: '选项B：这是另一个选项' },
-          { key: 'C', text: '选项C：这是第三个选项' },
-          { key: 'D', text: '选项D：这是第四个选项' }
-        ],
-        correctAnswer: type === 'single' ? 'A' : ['A', 'B'],
-        explanation: '这是题目的详细解析，解释了为什么选择这个答案。',
-        chapter: `第${Math.floor(i / 2) + 1}章`,
-        points: difficulty === 'easy' ? 2 : difficulty === 'medium' ? 3 : 5
-      });
-    }
-    
-    return questions;
-  },
+  // 选择章节并加载题目
+  async selectKnowledge(e) {
+    const { id, title } = e.currentTarget.dataset;
+    this.setData({ selectedKnowledgeId: id, loading: true });
 
-  // 选择练习类型
-  selectPracticeType(e) {
-    const { type } = e.currentTarget.dataset;
-    this.setData({ practiceMode: type });
-
-    if (type === 'daily') {
-      this.startDailyPractice();
-    } else if (type === 'chapter') {
-      // 显示章节选择
-      return;
-    } else if (type === 'exam') {
-      this.startExamPractice();
-    } else if (type === 'wrong') {
-      this.startWrongPractice();
+    try {
+      app.showLoading('加载题目中...');
+      const questions = await app.api.questionApi.getQuestionsByKnowledgePoint(id);
+      if (!questions || questions.length === 0) {
+        app.showToast('该章节暂无题目');
+        this.setData({ loading: false });
+        return;
+      }
+      this.prepareQuestions(questions);
+    } catch (error) {
+      console.error('加载章节题目失败:', error);
+      app.showToast('加载题目失败');
+      this.setData({ loading: false });
+    } finally {
+      app.hideLoading();
     }
   },
 
-  // 选择章节
-  selectChapter(e) {
-    const { chapter } = e.currentTarget.dataset;
-    this.setData({ selectedChapter: chapter });
-  },
+  // 错题重练 - 从错题本取题
+  async loadWrongQuestions() {
+    try {
+      app.showLoading('加载错题中...');
+      const res = await app.api.studyApi.getWrongQuestions();
+      const wrongList = (res && res.data) || [];
 
-  // 开始章节练习
-  startChapterPractice() {
-    if (!this.data.selectedChapter) {
-      app.showToast('请选择章节');
-      return;
+      if (wrongList.length === 0) {
+        app.showToast('暂无错题');
+        this.setData({ loading: false });
+        return;
+      }
+
+      // 组装题目（取错题里关联的题目信息）
+      const questions = wrongList
+        .filter(item => item.question)
+        .map(item => ({
+          id: item.questionId,
+          content: item.question.content,
+          type: item.question.type,
+          options: this.parseOptions(item.question.options || []),
+          difficulty: item.question.difficulty,
+          explanation: item.explanation || item.question.explanation,
+          correctAnswer: item.correctAnswer || item.question.correctAnswer
+        }));
+
+      this.prepareQuestions(questions);
+    } catch (error) {
+      console.error('加载错题失败:', error);
+      app.showToast('加载错题失败');
+      this.setData({ loading: false });
+    } finally {
+      app.hideLoading();
     }
-
-    const questions = this.generateMockQuestions(this.data.practiceSettings.questionCount);
-    this.startPractice(questions);
   },
 
-  // 开始每日练习
-  startDailyPractice() {
-    const questions = this.generateMockQuestions(5);
-    this.startPractice(questions);
-  },
+  // 统一题目格式
+  prepareQuestions(questions) {
+    const formatted = (questions || []).map(q => ({
+      id: q.id,
+      content: q.content,
+      type: q.type,
+      options: this.parseOptions(q.options || []),
+      difficulty: q.difficulty,
+      knowledgePoint: q.knowledgePoint || null
+    }));
 
-  // 开始考试练习
-  startExamPractice() {
-    const questions = this.generateMockQuestions(20);
-    this.startPractice(questions, 60); // 60分钟
-  },
-
-  // 开始错题练习
-  startWrongPractice() {
-    const questions = this.generateMockQuestions(8);
-    this.startPractice(questions);
-  },
-
-  // 开始练习
-  startPractice(questions, timeLimit = 30) {
     this.setData({
-      questions: questions,
+      questions: formatted,
       currentIndex: 0,
-      currentQuestion: questions[0],
-      userAnswers: {},
-      timeLeft: timeLimit * 60,
-      isSubmitted: false,
-      showResult: false
+      currentQuestion: formatted[0] || null,
+      selectedAnswer: '',
+      result: null,
+      correctCount: 0,
+      startTime: Date.now(),
+      timeUsed: 0,
+      finished: false,
+      loading: false
     });
 
     this.startTimer();
   },
 
-  // 开始计时
-  startTimer() {
-    this.clearTimer();
-    this.data.timer = setInterval(() => {
-      const timeLeft = this.data.timeLeft - 1;
-      this.setData({ timeLeft });
+  // 解析选项：['A. 相关性', 'B. 重要性'] -> [{key:'A', text:'相关性'}]
+  parseOptions(options) {
+    if (!Array.isArray(options)) return [];
 
-      if (timeLeft <= 0) {
-        this.submitPractice();
+    const parsed = options.map(opt => {
+      const match = String(opt).match(/^([A-Za-z])[.．、:：]\s*(.*)$/);
+      if (match) {
+        return { key: match[1], text: match[2] };
       }
-    }, 1000);
+      return { key: '', text: String(opt) };
+    });
+
+    // 判断题：无选项时给出 正确/错误
+    if (parsed.length === 0) {
+      return [
+        { key: '正确', text: '正确' },
+        { key: '错误', text: '错误' }
+      ];
+    }
+    return parsed;
   },
 
-  // 清除计时器
-  clearTimer() {
-    if (this.data.timer) {
-      clearInterval(this.data.timer);
-      this.setData({ timer: null });
-    }
+  // ============ 答题交互 ============
+
+  startTimer() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      this.setData({ timeUsed: Math.floor((Date.now() - this.data.startTime) / 1000) });
+    }, 1000);
   },
 
   // 选择答案
   selectAnswer(e) {
-    const { option } = e.currentTarget.dataset;
-    const { currentIndex, currentQuestion, userAnswers } = this.data;
-
-    if (currentQuestion.type === 'single') {
-      userAnswers[currentIndex] = option;
-    } else {
-      // 多选题
-      if (!userAnswers[currentIndex]) {
-        userAnswers[currentIndex] = [];
-      }
-      const answers = userAnswers[currentIndex];
-      const index = answers.indexOf(option);
-      
-      if (index > -1) {
-        answers.splice(index, 1);
-      } else {
-        answers.push(option);
-      }
-    }
-
-    this.setData({ userAnswers });
+    const { key } = e.currentTarget.dataset;
+    this.setData({ selectedAnswer: key });
   },
 
-  // 上一题
-  prevQuestion() {
-    const { currentIndex, questions } = this.data;
-    if (currentIndex > 0) {
-      const newIndex = currentIndex - 1;
-      this.setData({
-        currentIndex: newIndex,
-        currentQuestion: questions[newIndex]
+  // 提交本题（后端判分并自动收错题）
+  async submitAnswer() {
+    const { currentQuestion, selectedAnswer } = this.data;
+
+    if (!selectedAnswer) {
+      app.showToast('请先选择答案');
+      return;
+    }
+
+    try {
+      const res = await app.api.questionApi.submitAnswer({
+        questionId: String(currentQuestion.id),
+        userAnswer: selectedAnswer,
+        timeSpent: this.data.timeUsed
       });
+
+      this.setData({
+        result: {
+          isCorrect: res.isCorrect,
+          correctAnswer: res.correctAnswer || currentQuestion.correctAnswer,
+          explanation: res.explanation || currentQuestion.explanation
+        },
+        correctCount: this.data.correctCount + (res.isCorrect ? 1 : 0)
+      });
+    } catch (error) {
+      console.error('提交答案失败:', error);
+      app.showToast('提交失败，请重试');
     }
   },
 
@@ -237,189 +229,79 @@ Page({
   nextQuestion() {
     const { currentIndex, questions } = this.data;
     if (currentIndex < questions.length - 1) {
-      const newIndex = currentIndex + 1;
       this.setData({
-        currentIndex: newIndex,
-        currentQuestion: questions[newIndex]
+        currentIndex: currentIndex + 1,
+        currentQuestion: questions[currentIndex + 1],
+        selectedAnswer: '',
+        result: null,
+        startTime: Date.now(),
+        timeUsed: 0
       });
-    }
-  },
-
-  // 跳转到指定题目
-  goToQuestion(e) {
-    const { index } = e.currentTarget.dataset;
-    const { questions } = this.data;
-    
-    this.setData({
-      currentIndex: index,
-      currentQuestion: questions[index]
-    });
-  },
-
-  // 提交练习
-  async submitPractice() {
-    this.clearTimer();
-
-    const { questions, userAnswers } = this.data;
-    let correctCount = 0;
-    let totalPoints = 0;
-    let earnedPoints = 0;
-
-    // 计算结果
-    questions.forEach((question, index) => {
-      const userAnswer = userAnswers[index];
-      const isCorrect = this.checkAnswer(question, userAnswer);
-      
-      totalPoints += question.points;
-      if (isCorrect) {
-        correctCount++;
-        earnedPoints += question.points;
-      }
-    });
-
-    const result = {
-      totalQuestions: questions.length,
-      correctCount: correctCount,
-      wrongCount: questions.length - correctCount,
-      accuracy: Math.round((correctCount / questions.length) * 100),
-      totalPoints: totalPoints,
-      earnedPoints: earnedPoints,
-      timeUsed: (this.data.practiceSettings.timeLimit * 60) - this.data.timeLeft,
-      completedAt: new Date().toISOString()
-    };
-
-    // 保存练习记录
-    try {
-      await this.savePracticeRecord(result);
-    } catch (error) {
-      console.error('保存练习记录失败:', error);
-    }
-
-    this.setData({
-      isSubmitted: true,
-      showResult: true,
-      practiceResult: result
-    });
-  },
-
-  // 检查答案是否正确
-  checkAnswer(question, userAnswer) {
-    if (!userAnswer) return false;
-
-    if (question.type === 'single') {
-      return userAnswer === question.correctAnswer;
     } else {
-      // 多选题
-      if (!Array.isArray(userAnswer) || !Array.isArray(question.correctAnswer)) {
-        return false;
-      }
-      
-      if (userAnswer.length !== question.correctAnswer.length) {
-        return false;
-      }
-      
-      return userAnswer.sort().join('') === question.correctAnswer.sort().join('');
+      this.finishPractice();
     }
   },
 
-  // 保存练习记录
-  async savePracticeRecord(result) {
-    try {
-      // 模拟保存到本地存储
-      const records = wx.getStorageSync('practiceRecords') || [];
-      records.unshift({
-        id: Date.now(),
-        mode: this.data.practiceMode,
-        result: result,
-        questions: this.data.questions,
-        userAnswers: this.data.userAnswers,
-        createdAt: new Date().toISOString()
-      });
-      
-      // 只保留最近50条记录
-      if (records.length > 50) {
-        records.splice(50);
-      }
-      
-      wx.setStorageSync('practiceRecords', records);
-      console.log('练习记录保存成功');
-    } catch (error) {
-      console.error('保存练习记录失败:', error);
-    }
-  },
+  // 完成练习
+  finishPractice() {
+    if (this.timer) clearInterval(this.timer);
 
-  // 查看答案解析
-  viewExplanation(e) {
-    const { index } = e.currentTarget.dataset;
-    const question = this.data.questions[index];
-    
-    wx.showModal({
-      title: '答案解析',
-      content: question.explanation,
-      showCancel: false,
-      confirmText: '知道了'
-    });
+    this.setData({ finished: true });
   },
 
   // 重新练习
-  restartPractice() {
+  restart() {
     this.setData({
       currentIndex: 0,
       currentQuestion: this.data.questions[0],
-      userAnswers: {},
-      timeLeft: this.data.practiceSettings.timeLimit * 60,
-      isSubmitted: false,
-      showResult: false,
-      practiceResult: null
+      selectedAnswer: '',
+      result: null,
+      correctCount: 0,
+      startTime: Date.now(),
+      timeUsed: 0,
+      finished: false
     });
-
     this.startTimer();
   },
 
   // 返回首页
   goHome() {
-    wx.switchTab({
-      url: '/pages/index/index'
-    });
+    wx.switchTab({ url: '/pages/index/index' });
   },
 
-  // 查看详细结果
-  viewDetailResult() {
-    const { practiceResult, questions, userAnswers } = this.data;
-    
-    wx.navigateTo({
-      url: `/pages/practice-result/practice-result?data=${encodeURIComponent(JSON.stringify({
-        result: practiceResult,
-        questions: questions,
-        userAnswers: userAnswers
-      }))}`
-    });
+  // 去错题本
+  goWrongBook() {
+    wx.switchTab({ url: '/pages/wrong/wrong' });
   },
 
-  // 格式化时间
+  // ============ 展示辅助 ============
+
+  getTypeName(type) {
+    return { single: '单选题', multiple: '多选题', judge: '判断题', calculation: '计算题' }[type] || '选择题';
+  },
+
+  getDifficultyText(difficulty) {
+    return { easy: '简单', medium: '中等', hard: '困难' }[difficulty] || '中等';
+  },
+
+  getAnswerText(key) {
+    if (!key) return '';
+    const q = this.data.currentQuestion;
+    if (!q) return key;
+    const opt = q.options.find(o => o.key === key);
+    return opt ? `${opt.key}. ${opt.text}` : key;
+  },
+
   formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   },
 
-  // 获取用户答案显示
-  getUserAnswerText(questionIndex) {
-    const userAnswer = this.data.userAnswers[questionIndex];
-    if (!userAnswer) return '未作答';
-    
-    if (Array.isArray(userAnswer)) {
-      return userAnswer.join(', ');
-    }
-    return userAnswer;
-  },
-
-  // 检查题目是否已作答
-  isQuestionAnswered(questionIndex) {
-    const userAnswer = this.data.userAnswers[questionIndex];
-    if (Array.isArray(userAnswer)) {
-      return userAnswer.length > 0;
-    }
-    return !!userAnswer;
+  onShareAppMessage() {
+    return {
+      title: '我在AI中级会计助手刷题，快来一起学习吧！',
+      path: '/pages/index/index'
+    };
   }
 });

@@ -6,6 +6,7 @@ import { Question } from './entities/question.entity';
 import { StudyRecord } from '../study/entities/study-record.entity';
 import { WrongQuestion } from '../study/entities/wrong-question.entity';
 import { KnowledgePoint } from '../knowledge/entities/knowledge-point.entity';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { KnowledgePoint } from '../knowledge/entities/knowledge-point.entity';
       StudyRecord,
       WrongQuestion,
       KnowledgePoint
-    ])
+    ]),
+    UserModule
   ],
   controllers: [QuestionController],
   providers: [QuestionService],

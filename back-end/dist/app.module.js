@@ -10,7 +10,6 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
-const bull_1 = require("@nestjs/bull");
 const jwt_1 = require("@nestjs/jwt");
 const app_controller_1 = require("./app.controller");
 const auth_module_1 = require("./modules/auth/auth.module");
@@ -18,13 +17,7 @@ const user_module_1 = require("./modules/user/user.module");
 const knowledge_module_1 = require("./modules/knowledge/knowledge.module");
 const question_module_1 = require("./modules/question/question.module");
 const study_module_1 = require("./modules/study/study.module");
-const ai_module_1 = require("./modules/ai/ai.module");
 const wechat_module_1 = require("./modules/wechat/wechat.module");
-const ocr_module_1 = require("./modules/ocr/ocr.module");
-const analytics_module_1 = require("./modules/analytics/analytics.module");
-const exam_module_1 = require("./modules/exam/exam.module");
-const mindmap_module_1 = require("./modules/mindmap/mindmap.module");
-const audio_module_1 = require("./modules/audio/audio.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -51,17 +44,6 @@ exports.AppModule = AppModule = __decorate([
                 }),
                 inject: [config_1.ConfigService],
             }),
-            bull_1.BullModule.forRootAsync({
-                imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
-                    redis: {
-                        host: configService.get('REDIS_HOST', 'localhost'),
-                        port: configService.get('REDIS_PORT', 6379),
-                        password: configService.get('REDIS_PASSWORD'),
-                    },
-                }),
-                inject: [config_1.ConfigService],
-            }),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: (configService) => ({
@@ -76,13 +58,7 @@ exports.AppModule = AppModule = __decorate([
             knowledge_module_1.KnowledgeModule,
             question_module_1.QuestionModule,
             study_module_1.StudyModule,
-            ai_module_1.AiModule,
             wechat_module_1.WechatModule,
-            ocr_module_1.OcrModule,
-            analytics_module_1.AnalyticsModule,
-            exam_module_1.ExamModule,
-            mindmap_module_1.MindmapModule,
-            audio_module_1.AudioModule,
         ],
     })
 ], AppModule);

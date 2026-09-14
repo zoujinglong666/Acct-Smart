@@ -25,17 +25,11 @@ let QuestionController = class QuestionController {
     async getDailyQuestions(user) {
         return this.questionService.getDailyQuestions(user.id);
     }
-    async getWrongQuestions(user) {
-        return this.questionService.getWrongQuestions(user.id);
-    }
-    async getHighFrequencyWrongQuestions(user) {
-        return this.questionService.getHighFrequencyWrongQuestions(user.id);
-    }
     async getQuestionsByKnowledgePoint(knowledgePointId) {
         return this.questionService.getQuestionsByKnowledgePoint(knowledgePointId);
     }
     async submitAnswer(user, answerData) {
-        return this.questionService.submitAnswer(user.id, answerData.questionId, answerData.userAnswer, answerData.isCorrect, answerData.timeSpent);
+        return this.questionService.submitAnswer(user.id, answerData.questionId, answerData.userAnswer, answerData.timeSpent);
     }
     async getQuestionAnalysis(questionId) {
         return this.questionService.getQuestionAnalysis(questionId);
@@ -52,20 +46,6 @@ __decorate([
     __metadata("design:paramtypes", [user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], QuestionController.prototype, "getDailyQuestions", null);
-__decorate([
-    (0, common_1.Get)('wrong'),
-    __param(0, (0, get_user_decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.User]),
-    __metadata("design:returntype", Promise)
-], QuestionController.prototype, "getWrongQuestions", null);
-__decorate([
-    (0, common_1.Get)('high-frequency'),
-    __param(0, (0, get_user_decorator_1.GetUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.User]),
-    __metadata("design:returntype", Promise)
-], QuestionController.prototype, "getHighFrequencyWrongQuestions", null);
 __decorate([
     (0, common_1.Get)('by-knowledge-point/:knowledgePointId'),
     __param(0, (0, common_1.Param)('knowledgePointId')),

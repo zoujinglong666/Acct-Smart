@@ -60,7 +60,7 @@ let UserService = class UserService {
     async updateStudyStats(userId, studyTime, questionCount, correctCount) {
         const user = await this.findOne(userId);
         const today = new Date().toISOString().split('T')[0];
-        const lastStudyDate = user.lastStudyDate?.toISOString().split('T')[0];
+        const lastStudyDate = user.lastStudyDate ? String(user.lastStudyDate).split('T')[0] : null;
         let continuousStudyDays = user.continuousStudyDays;
         if (lastStudyDate !== today) {
             const yesterday = new Date();

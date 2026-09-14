@@ -80,7 +80,8 @@ export class UserService {
   async updateStudyStats(userId: number, studyTime: number, questionCount?: number, correctCount?: number) {
     const user = await this.findOne(userId);
     const today = new Date().toISOString().split('T')[0];
-    const lastStudyDate = user.lastStudyDate?.toISOString().split('T')[0];
+    // lastStudyDate 为 DATE 列，数据库返回字符串（YYYY-MM-DD）
+    const lastStudyDate = user.lastStudyDate ? String(user.lastStudyDate).split('T')[0] : null;
 
     // 更新连续学习天数
     let continuousStudyDays = user.continuousStudyDays;

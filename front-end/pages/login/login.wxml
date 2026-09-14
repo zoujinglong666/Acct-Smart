@@ -7,33 +7,23 @@
     <text class="app-desc">智能学习，轻松过考</text>
   </view>
 
-  <!-- 微信登录按钮 -->
+  <!-- 登录按钮 -->
   <view class="login-section">
-    <button class="wechat-login-btn {{loading ? 'loading' : ''}}" 
+    <button class="wechat-login-btn {{loading ? 'loading' : ''}}"
             bindtap="wechatLogin"
             disabled="{{loading}}">
       <view class="btn-content">
         <text class="btn-text">{{loading ? '登录中...' : '微信快速登录'}}</text>
       </view>
     </button>
-    
-    <!-- 普通登录按钮 -->
-    <button class="normal-login-btn" bindtap="goToNormalLogin">
+
+    <button class="normal-login-btn {{loading ? 'loading' : ''}}"
+            bindtap="guestLogin"
+            disabled="{{loading}}">
       <view class="btn-content">
-        <text class="btn-text">普通登录</text>
+        <text class="btn-text">游客模式（免登录体验）</text>
       </view>
     </button>
-  </view>
-
-
-  <!-- 用户协议 -->
-  <view class="agreement">
-    <text class="agreement-text">
-      登录即表示同意
-      <text class="agreement-link" bindtap="viewUserAgreement">《用户协议》</text>
-      和
-      <text class="agreement-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
-    </text>
   </view>
 
   <!-- 加载遮罩 -->

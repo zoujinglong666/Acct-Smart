@@ -3,7 +3,7 @@ import { User } from '../../user/entities/user.entity';
 import { Question } from '../../question/entities/question.entity';
 export declare class WrongQuestion extends BaseEntity {
     userId: number;
-    questionId: string;
+    questionId: number;
     userAnswer: string;
     correctAnswer: string;
     explanation: string;

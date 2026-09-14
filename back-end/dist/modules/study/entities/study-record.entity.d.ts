@@ -7,14 +7,7 @@ export declare class StudyRecord extends BaseEntity {
     userAnswer: string;
     isCorrect: boolean;
     timeSpent: number;
-    type: 'practice' | 'exam' | 'daily' | 'knowledge';
-    targetId: string;
-    studyTime: number;
-    completedQuestions: number;
-    accuracy: number;
-    studyDate: Date;
-    progress: number;
-    examRecordId: number;
+    type: 'practice' | 'daily';
     user: User;
     question: Question;
 }

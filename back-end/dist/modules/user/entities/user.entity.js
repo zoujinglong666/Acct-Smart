@@ -14,8 +14,6 @@ const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../../common/entities/base.entity");
 const study_record_entity_1 = require("../../study/entities/study-record.entity");
 const wrong_question_entity_1 = require("../../study/entities/wrong-question.entity");
-const study_plan_entity_1 = require("../../study/entities/study-plan.entity");
-const exam_record_entity_1 = require("../../exam/entities/exam-record.entity");
 let User = class User extends base_entity_1.BaseEntity {
 };
 exports.User = User;
@@ -91,14 +89,6 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => wrong_question_entity_1.WrongQuestion, wrongQuestion => wrongQuestion.user),
     __metadata("design:type", Array)
 ], User.prototype, "wrongQuestions", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => study_plan_entity_1.StudyPlan, plan => plan.user),
-    __metadata("design:type", Array)
-], User.prototype, "studyPlans", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => exam_record_entity_1.ExamRecord, record => record.user),
-    __metadata("design:type", Array)
-], User.prototype, "examRecords", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

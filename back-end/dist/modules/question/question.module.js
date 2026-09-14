@@ -15,6 +15,7 @@ const question_entity_1 = require("./entities/question.entity");
 const study_record_entity_1 = require("../study/entities/study-record.entity");
 const wrong_question_entity_1 = require("../study/entities/wrong-question.entity");
 const knowledge_point_entity_1 = require("../knowledge/entities/knowledge-point.entity");
+const user_module_1 = require("../user/user.module");
 let QuestionModule = class QuestionModule {
 };
 exports.QuestionModule = QuestionModule;
@@ -26,7 +27,8 @@ exports.QuestionModule = QuestionModule = __decorate([
                 study_record_entity_1.StudyRecord,
                 wrong_question_entity_1.WrongQuestion,
                 knowledge_point_entity_1.KnowledgePoint
-            ])
+            ]),
+            user_module_1.UserModule
         ],
         controllers: [question_controller_1.QuestionController],
         providers: [question_service_1.QuestionService],

@@ -23,7 +23,7 @@ __decorate([
 ], WrongQuestion.prototype, "userId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ comment: '题目ID' }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], WrongQuestion.prototype, "questionId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ comment: '用户答案' }),

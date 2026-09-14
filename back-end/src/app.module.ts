@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import {ConfigModule, ConfigService} from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bull';
 import { JwtModule } from '@nestjs/jwt';
 
 import { AppController } from './app.controller';
@@ -10,13 +9,7 @@ import { UserModule } from './modules/user/user.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { QuestionModule } from './modules/question/question.module';
 import { StudyModule } from './modules/study/study.module';
-import { AiModule } from './modules/ai/ai.module';
 import { WechatModule } from './modules/wechat/wechat.module';
-import { OcrModule } from './modules/ocr/ocr.module';
-import { AnalyticsModule } from './modules/analytics/analytics.module';
-import { ExamModule } from './modules/exam/exam.module';
-import { MindmapModule } from './modules/mindmap/mindmap.module';
-import { AudioModule } from './modules/audio/audio.module';
 
 @Module({
   controllers: [AppController],
@@ -44,19 +37,6 @@ import { AudioModule } from './modules/audio/audio.module';
       inject: [ConfigService],
     }),
 
-    // Redis和队列
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          password: configService.get('REDIS_PASSWORD'),
-        },
-      }),
-      inject: [ConfigService],
-    }),
-
     // JWT全局配置
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -68,19 +48,13 @@ import { AudioModule } from './modules/audio/audio.module';
       global: true,
     }),
 
-    // 业务模块
+    // 业务模块（MVP 闭环：认证 / 用户 / 知识点 / 题库 / 学习记录与错题 / 微信）
     AuthModule,
     UserModule,
     KnowledgeModule,
     QuestionModule,
     StudyModule,
-    AiModule,
     WechatModule,
-    OcrModule,
-    AnalyticsModule,
-    ExamModule,
-    MindmapModule,
-    AudioModule,
   ],
 })
 export class AppModule {}

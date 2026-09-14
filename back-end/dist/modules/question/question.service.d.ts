@@ -1,28 +1,26 @@
 import { Repository } from 'typeorm';
 import { Question } from './entities/question.entity';
+import { StudyRecord } from '../study/entities/study-record.entity';
+import { WrongQuestion } from '../study/entities/wrong-question.entity';
+import { UserService } from '../user/user.service';
 export declare class QuestionService {
     private questionRepository;
-    constructor(questionRepository: Repository<Question>);
-    findAll(page?: number, limit?: number, filters?: any): Promise<{
-        data: Question[];
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    }>;
-    findOne(id: number): Promise<Question>;
-    getRandomQuestions(count?: number, filters?: any): Promise<Question[]>;
-    updateQuestionStats(id: number, isCorrect: boolean): Promise<void>;
-    saveOcrQuestion(questionData: any): Promise<Question>;
+    private studyRecordRepository;
+    private wrongQuestionRepository;
+    private userService;
+    constructor(questionRepository: Repository<Question>, studyRecordRepository: Repository<StudyRecord>, wrongQuestionRepository: Repository<WrongQuestion>, userService: UserService);
     getDailyQuestions(userId: number): Promise<Question[]>;
-    getWrongQuestions(userId: number): Promise<any[]>;
-    getHighFrequencyWrongQuestions(userId: number): Promise<any[]>;
+    getRandomQuestions(count?: number, filters?: any): Promise<Question[]>;
     getQuestionsByKnowledgePoint(knowledgePointId: string): Promise<Question[]>;
-    submitAnswer(userId: number, questionId: string, userAnswer: string, isCorrect: boolean, timeSpent: number): Promise<{
+    submitAnswer(userId: number, questionId: string, userAnswer: string, timeSpent: number): Promise<{
         success: boolean;
         isCorrect: boolean;
+        correctAnswer: string;
         explanation: string;
     }>;
+    private checkAnswer;
+    private upsertWrongQuestion;
+    updateQuestionStats(id: number, isCorrect: boolean): Promise<void>;
     getQuestionAnalysis(questionId: string): Promise<{
         question: Question;
         analysis: string;

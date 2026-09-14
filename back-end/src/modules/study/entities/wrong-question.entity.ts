@@ -9,7 +9,7 @@ export class WrongQuestion extends BaseEntity {
   userId: number;
 
   @Column({ comment: '题目ID' })
-  questionId: string;
+  questionId: number;
 
   @Column({ comment: '用户答案' })
   userAnswer: string;
