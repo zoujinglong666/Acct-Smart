@@ -249,6 +249,22 @@ Page({
     this.setData({ finished: true });
   },
 
+  // 返回章节选择（仅章节练习模式）
+  async backToChapter() {
+    if (this.timer) clearInterval(this.timer);
+    this.setData({
+      questions: [],
+      currentIndex: 0,
+      currentQuestion: null,
+      selectedAnswer: '',
+      result: null,
+      correctCount: 0,
+      finished: false,
+      loading: true
+    });
+    await this.loadKnowledgePoints();
+  },
+
   // 重新练习
   restart() {
     this.setData({

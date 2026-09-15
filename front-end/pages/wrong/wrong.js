@@ -146,6 +146,17 @@ Page({
     });
   },
 
+  // 错题重练
+  retryWrong() {
+    if (this.data.filteredQuestions.length === 0) {
+      app.showToast('当前筛选下没有错题');
+      return;
+    }
+    wx.navigateTo({
+      url: '/pages/practice/practice?mode=wrong'
+    });
+  },
+
   // 格式化日期
   formatDate(dateStr) {
     if (!dateStr) return '';

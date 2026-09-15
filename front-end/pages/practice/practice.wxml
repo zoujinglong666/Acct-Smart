@@ -69,6 +69,7 @@
       <button wx:else class="btn-primary submit-btn" bindtap="nextQuestion">
         {{currentIndex === questions.length - 1 ? '查看结果' : '下一题'}}
       </button>
+      <button wx:if="{{mode === 'chapter'}}" class="btn-secondary submit-btn" bindtap="backToChapter">换章节</button>
     </view>
 
     <view class="timer">已用时 {{formatTime(timeUsed)}}</view>

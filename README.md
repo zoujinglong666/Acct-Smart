@@ -18,6 +18,7 @@ Acct-Smart-main
 │   │   └── wechat/           # 微信登录服务
 │   ├── database/init.sql     # 数据库初始化脚本（5 张表 + 种子数据）
 │   └── .env.example          # 环境变量模板
+├── web/index.html            # Web 版前端（单页应用，浏览器直接打开即可体验完整闭环）
 └── front-end/                # 微信小程序（5 个页面）
     ├── pages/
     │   ├── index/            # 首页（统计 + 入口）
@@ -31,7 +32,7 @@ Acct-Smart-main
 ## 技术栈
 
 - **后端**: NestJS 10 + TypeScript + TypeORM + PostgreSQL + JWT
-- **前端**: 微信小程序原生框架
+- **前端**: 微信小程序原生框架 + Web 单页（原生 HTML/JS）
 
 ## 快速开始
 
@@ -61,9 +62,11 @@ npm run start:dev
 - 服务地址: http://localhost:8123
 - API 文档: http://localhost:8123/api/docs
 
-### 3. 启动前端
+### 3. 启动前端（任选其一）
 
-用微信开发者工具打开 `front-end` 目录，配置项目 AppID（无 AppID 可用测试号）。
+**Web 版（无需安装，推荐快速体验）**：直接用浏览器打开 `web/index.html`，点击"游客模式"即可体验完整闭环。
+
+**微信小程序**：用微信开发者工具打开 `front-end` 目录，配置项目 AppID（无 AppID 可用测试号）。
 登录页支持**游客模式**（模拟登录），无需微信凭证即可体验完整闭环。
 
 ## API 接口

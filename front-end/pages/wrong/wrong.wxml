@@ -28,6 +28,8 @@
       <input class="search-input" placeholder="搜索错题..." bindinput="onSearch" />
     </view>
 
+    <button class="retry-btn" bindtap="retryWrong">错题重练（{{filteredQuestions.length}}题）</button>
+
     <view class="filter-tabs">
       <view class="filter-tab {{currentFilter === 'all' ? 'active' : ''}}"
             bindtap="switchFilter" data-filter="all">

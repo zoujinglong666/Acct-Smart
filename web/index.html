@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI中级会计助手</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; background:#F3F4F6; color:#1F2937; min-height:100vh; }
+button { font-family:inherit; cursor:pointer; border:none; background:none; }
+input { font-family:inherit; outline:none; }
+
+/* 顶部导航 */
+.topbar { position:fixed; top:0; left:0; right:0; background:#1E40AF; color:#fff; height:56px; display:flex; align-items:center; padding:0 16px; z-index:100; }
+.topbar .title { font-size:17px; font-weight:600; }
+.topbar .back { color:#fff; font-size:20px; margin-right:12px; cursor:pointer; opacity:.9; }
+.topbar .right { margin-left:auto; font-size:14px; opacity:.9; }
+
+/* 容器 */
+.container { max-width:520px; margin:0 auto; padding:72px 16px 24px; min-height:100vh; }
+
+/* 卡片 */
+.card { background:#fff; border-radius:14px; padding:20px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.card-title { font-size:16px; font-weight:600; margin-bottom:14px; }
+
+/* 按钮 */
+.btn { display:block; width:100%; padding:13px; border-radius:10px; font-size:15px; font-weight:500; text-align:center; transition:opacity .15s; }
+.btn:active { opacity:.8; }
+.btn-primary { background:#1E40AF; color:#fff; }
+.btn-light { background:#EFF6FF; color:#1E40AF; }
+.btn-gray { background:#F3F4F6; color:#374151; }
+.btn-danger-light { background:#FEF2F2; color:#DC2626; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn + .btn { margin-top:10px; }
+
+/* 表单 */
+.input { width:100%; padding:12px 14px; border:1px solid #E5E7EB; border-radius:10px; font-size:15px; background:#fff; }
+.input:focus { border-color:#1E40AF; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:13px; color:#6B7280; margin-bottom:6px; }
+
+/* 登录页 */
+.login-wrap { max-width:400px; margin:0 auto; padding-top:80px; }
+.login-logo { text-align:center; margin-bottom:36px; }
+.login-logo .logo { font-size:56px; }
+.login-logo h1 { font-size:24px; margin-top:12px; }
+.login-logo p { color:#9CA3AF; font-size:14px; margin-top:6px; }
+.login-switch { text-align:center; font-size:13px; color:#6B7280; margin-top:14px; }
+.login-switch a { color:#1E40AF; cursor:pointer; }
+
+/* 统计 */
+.stats-hero { background:#1E40AF; color:#fff; border-radius:14px; padding:20px; margin-bottom:14px; }
+.stats-hero .name { font-size:18px; font-weight:600; }
+.stats-hero .sub { font-size:13px; opacity:.8; margin-top:4px; }
+.stats-grid { display:flex; margin-top:18px; gap:8px; }
+.stats-grid .item { flex:1; text-align:center; background:rgba(255,255,255,.12); border-radius:10px; padding:12px 4px; }
+.stats-grid .num { display:block; font-size:22px; font-weight:700; }
+.stats-grid .lbl { display:block; font-size:11px; opacity:.8; margin-top:4px; }
+
+/* 首页入口 */
+.entries { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.entry { background:#fff; border-radius:14px; padding:20px; text-align:center; cursor:pointer; transition:transform .1s; }
+.entry:active { transform:scale(.97); }
+.entry .icon { font-size:34px; }
+.entry .t { font-size:15px; font-weight:600; margin-top:8px; }
+.entry .d { font-size:12px; color:#9CA3AF; margin-top:4px; }
+
+/* 知识点列表 */
+.kp-item { display:flex; align-items:center; justify-content:space-between; padding:14px 4px; border-bottom:1px solid #F3F4F6; cursor:pointer; }
+.kp-item:last-child { border-bottom:none; }
+.kp-item .t { font-size:15px; font-weight:500; }
+.kp-item .c { font-size:12px; color:#9CA3AF; margin-top:3px; }
+.kp-item .arrow { color:#D1D5DB; }
+
+/* 练习 */
+.session-meta { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.tag { font-size:11px; padding:3px 10px; border-radius:6px; font-weight:500; }
+.tag-type { background:#1E40AF; color:#fff; }
+.tag-easy { background:#D1FAE5; color:#059669; }
+.tag-medium { background:#FEF3C7; color:#D97706; }
+.tag-hard { background:#FEE2E2; color:#DC2626; }
+.progress { margin-left:auto; font-size:13px; color:#6B7280; }
+.q-content { font-size:17px; line-height:1.7; margin-bottom:18px; }
+.option { display:flex; align-items:center; padding:13px 14px; border:1.5px solid #E5E7EB; border-radius:10px; margin-bottom:10px; cursor:pointer; transition:all .15s; }
+.option .key { width:30px; height:30px; line-height:30px; text-align:center; border-radius:50%; background:#F3F4F6; font-size:13px; font-weight:600; margin-right:12px; flex-shrink:0; }
+.option .txt { font-size:15px; }
+.option.selected { border-color:#1E40AF; background:#EFF6FF; }
+.option.selected .key { background:#1E40AF; color:#fff; }
+.option.correct { border-color:#059669; background:#ECFDF5; }
+.option.correct .key { background:#059669; color:#fff; }
+.option.wrong { border-color:#DC2626; background:#FEF2F2; }
+.option.wrong .key { background:#DC2626; color:#fff; }
+.result-box { border-radius:10px; padding:14px; margin-bottom:14px; font-size:14px; line-height:1.6; }
+.result-box.ok { background:#ECFDF5; color:#065F46; }
+.result-box.bad { background:#FEF2F2; color:#991B1B; }
+.result-box .ans { font-weight:600; margin-bottom:4px; }
+.result-box .exp { opacity:.9; }
+.timer { text-align:center; font-size:12px; color:#9CA3AF; margin-top:12px; }
+
+/* 结果页 */
+.finish { text-align:center; padding:20px 0; }
+.finish .big { font-size:52px; margin-bottom:10px; }
+.finish h2 { font-size:20px; margin-bottom:8px; }
+.finish .score { font-size:40px; font-weight:700; color:#1E40AF; margin:12px 0 4px; }
+.finish .sub { color:#6B7280; font-size:14px; margin-bottom:20px; }
+
+/* 错题本 */
+.filter-bar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-chip { padding:7px 14px; border-radius:8px; font-size:13px; background:#fff; color:#6B7280; border:1px solid #E5E7EB; }
+.filter-chip.active { background:#1E40AF; color:#fff; border-color:#1E40AF; }
+.wrong-item .q { font-size:15px; line-height:1.6; margin-bottom:8px; }
+.wrong-meta { display:flex; gap:8px; align-items:center; font-size:12px; margin-bottom:10px; flex-wrap:wrap; }
+.wrong-meta .cnt { background:#FEE2E2; color:#DC2626; padding:2px 8px; border-radius:6px; }
+.wrong-meta .st { padding:2px 8px; border-radius:6px; }
+.wrong-meta .st.done { background:#D1FAE5; color:#059669; }
+.wrong-meta .st.todo { background:#FEF3C7; color:#D97706; }
+.wrong-meta .time { color:#9CA3AF; margin-left:auto; }
+.ans-line { font-size:13px; margin-bottom:4px; }
+.ans-line .lb { color:#6B7280; }
+.ans-line .err { color:#DC2626; font-weight:500; }
+.ans-line .ok { color:#059669; font-weight:500; }
+.wrong-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+.wrong-actions button { font-size:13px; padding:7px 16px; border-radius:8px; }
+.empty { text-align:center; padding:60px 20px; color:#9CA3AF; }
+.empty .icon { font-size:50px; margin-bottom:12px; }
+.empty p { font-size:14px; margin-bottom:16px; }
+
+/* toast */
+.toast { position:fixed; top:70px; left:50%; transform:translateX(-50%); background:rgba(17,24,39,.9); color:#fff; padding:10px 22px; border-radius:10px; font-size:14px; z-index:999; opacity:0; transition:opacity .25s; pointer-events:none; }
+.toast.show { opacity:1; }
+
+.hidden { display:none !important; }
+.mt10 { margin-top:10px; }
+.text-center { text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="topbar hidden" id="topbar">
+  <span class="back" id="backBtn">‹</span>
+  <span class="title" id="topTitle">AI中级会计助手</span>
+  <span class="right" id="topRight"></span>
+</div>
+
+<div class="container" id="app"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================= 配置与请求封装 =================
+const API_BASE = 'http://127.0.0.1:8123/api';
+let TOKEN = localStorage.getItem('token') || '';
+let USER = null;
+
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+  const res = await fetch(API_BASE + path, { ...options, headers });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch (e) { throw new Error('响应解析失败'); }
+  // 统一业务码判断：0 成功；40100 未登录
+  if (data && typeof data === 'object' && 'code' in data) {
+    if (data.code === 0) return data.data;
+    if (data.code === 40100) { logout(); location.hash = '#/login'; }
+    throw new Error(data.message || '请求失败');
+  }
+  return data; // 直接返回数组/对象的接口
+}
+
+// ================= Toast =================
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ================= 路由 =================
+const routes = { '#/login': loginView, '#/home': homeView, '#/practice': practiceView, '#/wrong': wrongView, '#/profile': profileView };
+
+function render() {
+  const hash = location.hash || '#/login';
+  const key = hash.split('?')[0];
+  const app = document.getElementById('app');
+  const topbar = document.getElementById('topbar');
+  const route = routes[key] || loginView;
+
+  // 需要登录的页面
+  if ((hash === '#/home' || hash === '#/wrong' || hash === '#/profile' || hash.startsWith('#/practice')) && !TOKEN) {
+    location.hash = '#/login'; return;
+  }
+  topbar.classList.toggle('hidden', key === '#/login');
+  route(app, hash);
+}
+
+window.addEventListener('hashchange', render);
+
+// ================= 工具 =================
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function typeName(t) { return { single:'单选题', multiple:'多选题', judge:'判断题', calculation:'计算题' }[t] || '选择题'; }
+function diffText(d) { return { easy:'简单', medium:'中等', hard:'困难' }[d] || '中等'; }
+function diffTag(d) { return { easy:'tag-easy', medium:'tag-medium', hard:'tag-hard' }[d] || 'tag-medium'; }
+function parseOptions(opts) {
+  if (!Array.isArray(opts)) return [];
+  const parsed = opts.map(o => { const m = String(o).match(/^([A-Za-z])[.．、:：]\s*(.*)$/); return m ? { key:m[1], text:m[2] } : { key:'', text:String(o) }; });
+  if (parsed.length === 0) return [{ key:'正确', text:'正确' }, { key:'错误', text:'错误' }];
+  return parsed;
+}
+function fmtTime(s) { s = s || 0; return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+function fmtDate(d) { if (!d) return ''; const t = new Date(d); const p = n => String(n).padStart(2,'0'); return (t.getMonth()+1) + '-' + p(t.getDate()) + ' ' + p(t.getHours()) + ':' + p(t.getMinutes()); }
+
+// ================= 登录 =================
+function loginView(app) {
+  app.innerHTML = `
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="logo">🎓</div>
+      <h1>AI中级会计助手</h1>
+      <p>智能刷题 · 错题闭环 · 轻松过考</p>
+    </div>
+    <div class="card">
+      <button class="btn btn-primary" id="guestBtn">游客模式（免登录体验）</button>
+      <div class="mt10"></div>
+      <button class="btn btn-light" id="showLogin">账号密码登录</button>
+    </div>
+    <div class="card hidden" id="formCard">
+      <div class="field"><label>用户名</label><input class="input" id="loginUser" placeholder="请输入用户名"></div>
+      <div class="field"><label>密码</label><input class="input" id="loginPass" type="password" placeholder="请输入密码"></div>
+      <button class="btn btn-primary" id="loginBtn">登录</button>
+      <div class="mt10"></div>
+      <button class="btn btn-gray" id="registerBtn">注册新账号</button>
+    </div>
+  </div>`;
+
+  document.getElementById('guestBtn').onclick = async () => {
+    try { await doLogin('/auth/wechat-login', { code: 'mock' }); }
+    catch (e) { toast(e.message); }
+  };
+  document.getElementById('showLogin').onclick = () => document.getElementById('formCard').classList.remove('hidden');
+  document.getElementById('loginBtn').onclick = async () => {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    if (!username || !password) return toast('请输入用户名和密码');
+    try { await doLogin('/auth/login', { username, password }); }
+    catch (e) { toast(e.message); }
+  };
+  document.getElementById('registerBtn').onclick = async () => {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    if (!username || !password) return toast('请填写用户名和密码');
+    try {
+      await api('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) });
+      toast('注册成功，请登录');
+      await doLogin('/auth/login', { username, password });
+    } catch (e) { toast(e.message); }
+  };
+}
+
+async function doLogin(path, payload) {
+  const data = await api(path, { method: 'POST', body: JSON.stringify(payload) });
+  TOKEN = data.token;
+  USER = data.userInfo;
+  localStorage.setItem('token', TOKEN);
+  localStorage.setItem('user', JSON.stringify(USER));
+  toast('登录成功');
+  setTimeout(() => location.hash = '#/home', 300);
+}
+
+function logout() {
+  TOKEN = ''; USER = null;
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+}
+
+// ================= 首页 =================
+async function homeView(app) {
+  document.getElementById('topTitle').textContent = 'AI中级会计助手';
+  document.getElementById('topRight').textContent = USER ? USER.nickname : '';
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+
+  let stats = { totalStudyTime:0, continuousStudyDays:0, todayQuestions:0, correctRate:0 };
+  try {
+    const s = await api('/user/stats');
+    stats = Object.assign(stats, s);
+    try { const t = await api('/study/today-status'); stats.todayQuestions = t.todayQuestions || 0; } catch(e){}
+  } catch(e) { console.warn(e); }
+
+  app.innerHTML = `
+    <div class="stats-hero">
+      <div class="name">${esc(USER && USER.nickname || '会计学员')}</div>
+      <div class="sub">今天也要加油学习哦</div>
+      <div class="stats-grid">
+        <div class="item"><span class="num">${stats.totalStudyTime}</span><span class="lbl">学习时长(分)</span></div>
+        <div class="item"><span class="num">${stats.continuousStudyDays}</span><span class="lbl">连续(天)</span></div>
+        <div class="item"><span class="num">${stats.todayQuestions}</span><span class="lbl">今日答题</span></div>
+        <div class="item"><span class="num">${stats.correctRate}%</span><span class="lbl">正确率</span></div>
+      </div>
+    </div>
+    <div class="entries">
+      <div class="entry" data-go="practice?mode=daily"><div class="icon">📅</div><div class="t">每日练习</div><div class="d">随机5题</div></div>
+      <div class="entry" data-go="practice?mode=chapter"><div class="icon">📚</div><div class="t">章节练习</div><div class="d">按知识点</div></div>
+      <div class="entry" data-go="practice?mode=wrong"><div class="icon">❌</div><div class="t">错题重练</div><div class="d">巩固薄弱</div></div>
+      <div class="entry" data-go="wrong"><div class="icon">📝</div><div class="t">错题本</div><div class="d">复习错题</div></div>
+    </div>`;
+
+  app.querySelectorAll('.entry').forEach(el => el.onclick = () => location.hash = '#/' + el.dataset.go);
+}
+
+// ================= 练习 =================
+let PQ = { mode:'daily', list:[], idx:0, selected:[], result:null, correct:0, start:0, time:0, timer:null, kps:[], done:false };
+
+function practiceView(app, hash) {
+  const params = new URLSearchParams(hash.split('?')[1] || '');
+  const mode = params.get('mode') || 'daily';
+  document.getElementById('topTitle').textContent = { daily:'每日练习', chapter:'章节练习', wrong:'错题重练' }[mode];
+  stopTimer();
+
+  PQ = { mode, list:[], idx:0, selected:[], result:null, correct:0, start:0, time:0, timer:null, kps:[], done:false };
+
+  if (mode === 'chapter') return renderKPList(app);
+  loadQuestions(app, mode);
+}
+
+function stopTimer() { if (PQ.timer) { clearInterval(PQ.timer); PQ.timer = null; } }
+
+async function loadQuestions(app, mode) {
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+  try {
+    if (mode === 'daily') {
+      PQ.list = await api('/questions/daily');
+    } else if (mode === 'wrong') {
+      const data = await api('/study/wrong-questions');
+      PQ.list = data.filter(w => w.question).map(w => ({
+        id: w.questionId,
+        content: w.question.content,
+        type: w.question.type,
+        options: w.question.options,
+        difficulty: w.question.difficulty
+      }));
+      if (PQ.list.length === 0) {
+        app.innerHTML = `<div class="empty"><div class="icon">📝</div><p>暂无错题，先去练习吧</p><button class="btn btn-primary" style="max-width:200px;margin:0 auto;" onclick="location.hash='#/practice?mode=daily'">去每日练习</button></div>`;
+        return;
+      }
+    }
+    if (!PQ.list || PQ.list.length === 0) {
+      app.innerHTML = '<div class="empty"><div class="icon">📭</div><p>该模块暂无题目</p></div>';
+      return;
+    }
+    PQ.start = Date.now();
+    PQ.timer = setInterval(() => { PQ.time = Math.floor((Date.now() - PQ.start) / 1000); }, 1000);
+    renderQuestion(app);
+  } catch (e) {
+    app.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>${esc(e.message)}</p></div>`;
+  }
+}
+
+async function renderKPList(app) {
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+  try {
+    PQ.kps = await api('/knowledge');
+    if (!PQ.kps || PQ.kps.length === 0) { app.innerHTML = '<div class="empty"><p>暂无知识点</p></div>'; return; }
+    app.innerHTML = `<div class="card"><div class="card-title">选择知识点</div>
+      ${PQ.kps.map(k => `<div class="kp-item" data-id="${k.id}"><div><div class="t">${esc(k.title)}</div><div class="c">${esc(k.chapterNumber || '未分类')}</div></div><span class="arrow">›</span></div>`).join('')}
+    </div>`;
+    app.querySelectorAll('.kp-item').forEach(el => el.onclick = () => loadKPQuestions(app, el.dataset.id));
+  } catch (e) { app.innerHTML = `<div class="empty"><p>${esc(e.message)}</p></div>`; }
+}
+
+async function loadKPQuestions(app, id) {
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+  try {
+    PQ.list = await api('/questions/by-knowledge-point/' + id);
+    if (!PQ.list || PQ.list.length === 0) { toast('该章节暂无题目'); return renderKPList(app); }
+    PQ.start = Date.now();
+    PQ.timer = setInterval(() => { PQ.time = Math.floor((Date.now() - PQ.start) / 1000); }, 1000);
+    renderQuestion(app);
+  } catch (e) { toast(e.message); }
+}
+
+function renderQuestion(app) {
+  const q = PQ.list[PQ.idx];
+  const opts = parseOptions(q.options);
+  const sel = PQ.selected.slice();
+  const r = PQ.result;
+
+  const optionsHtml = opts.map(o => {
+    let cls = 'option';
+    if (sel.includes(o.key)) cls += ' selected';
+    if (r) {
+      if (o.key === (q.type === 'multiple' ? '' : r.correctAnswer) || (q.type === 'multiple' && r.correctAnswer && r.correctAnswer.split('').includes(o.key))) {
+        if (sel.includes(o.key) || o.key === r.correctAnswer) cls += ' correct';
+      }
+      if (sel.includes(o.key) && r.isCorrect === false) {
+        // 多选/单选错误时，选中的错误项标红
+        const correctArr = r.correctAnswer ? r.correctAnswer.split('') : [];
+        if (!correctArr.includes(o.key)) cls += ' wrong';
+      }
+    }
+    return `<div class="${cls}" data-key="${o.key}"><span class="key">${o.key}</span><span class="txt">${esc(o.text)}</span></div>`;
+  }).join('');
+
+  const resultHtml = r ? (r.isCorrect
+    ? `<div class="result-box ok"><div class="ans">✓ 回答正确</div><div class="exp">${esc(r.explanation || '')}</div></div>`
+    : `<div class="result-box bad"><div class="ans">✗ 回答错误　正确答案：${esc(r.correctAnswer)}</div><div class="exp">${esc(r.explanation || '')}</div></div>`)
+  : '';
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="session-meta">
+        <span class="tag tag-type">${typeName(q.type)}</span>
+        <span class="tag ${diffTag(q.difficulty)}">${diffText(q.difficulty)}</span>
+        <span class="progress">${PQ.idx + 1} / ${PQ.list.length}</span>
+      </div>
+      <div class="q-content">${esc(q.content)}</div>
+      <div id="options">${optionsHtml}</div>
+      ${resultHtml}
+      <button class="btn btn-primary" id="submitBtn">${r ? (PQ.idx === PQ.list.length - 1 ? '查看结果' : '下一题') : '提交本题'}</button>
+      ${PQ.mode === 'chapter' ? '<div class="mt10"></div><button class="btn btn-gray" id="switchKpBtn">换章节</button>' : ''}
+      <div class="timer">已用时 ${fmtTime(PQ.time)}　答对 ${PQ.correct} 题</div>
+    </div>`;
+
+  // 选项点击：单选/判断题即时选中；多选可切换
+  if (!r) {
+    app.querySelectorAll('.option').forEach(el => el.onclick = () => {
+      const key = el.dataset.key;
+      if (q.type === 'multiple') {
+        const i = PQ.selected.indexOf(key);
+        if (i >= 0) PQ.selected.splice(i, 1); else PQ.selected.push(key);
+      } else {
+        PQ.selected = [key];
+      }
+      renderQuestion(app);
+    });
+  }
+
+  document.getElementById('submitBtn').onclick = async () => {
+    if (r) {
+      if (PQ.idx === PQ.list.length - 1) return finishView(app);
+      PQ.idx++; PQ.selected = []; PQ.result = null;
+      return renderQuestion(app);
+    }
+    if (PQ.selected.length === 0) return toast('请先选择答案');
+    const userAnswer = q.type === 'multiple' ? [...PQ.selected].sort().join('') : PQ.selected[0];    try {
+      const res = await api('/questions/answer', { method: 'POST', body: JSON.stringify({ questionId: String(q.id), userAnswer, timeSpent: PQ.time }) });
+      PQ.result = { isCorrect: res.isCorrect, correctAnswer: res.correctAnswer, explanation: res.explanation };
+      if (res.isCorrect) PQ.correct++;
+      renderQuestion(app);
+    } catch (e) { toast(e.message); }
+  };
+
+  // 换章节（仅章节练习模式）
+  const switchBtn = document.getElementById('switchKpBtn');
+  if (switchBtn) switchBtn.onclick = () => { stopTimer(); renderKPList(app); };
+}
+
+function finishView(app) {
+  stopTimer();
+  const total = PQ.list.length;
+  const rate = total ? Math.round(PQ.correct / total * 100) : 0;
+  app.innerHTML = `
+    <div class="card finish">
+      <div class="big">🎉</div>
+      <h2>练习完成</h2>
+      <div class="score">${PQ.correct} / ${total}</div>
+      <div class="sub">正确率 ${rate}%　·　用时 ${fmtTime(PQ.time)}</div>
+      <button class="btn btn-primary" id="againBtn">再练一次</button>
+      <div class="mt10"></div>
+      <button class="btn btn-light" id="wrongBtn">去错题本</button>
+      <div class="mt10"></div>
+      <button class="btn btn-gray" onclick="location.hash='#/home'">返回首页</button>
+    </div>`;
+  document.getElementById('againBtn').onclick = () => location.hash = location.hash;
+  document.getElementById('wrongBtn').onclick = () => location.hash = '#/wrong';
+}
+
+// ================= 错题本 =================
+let W = { list:[], filter:'all', kw:'' };
+
+async function wrongView(app) {
+  document.getElementById('topTitle').textContent = '错题本';
+  document.getElementById('topRight').textContent = '';
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+  try {
+    W.list = await api('/study/wrong-questions');
+    renderWrong(app);
+  } catch (e) {
+    app.innerHTML = `<div class="empty"><p>${esc(e.message)}</p></div>`;
+  }
+}
+
+function renderWrong(app) {
+  const total = W.list.length;
+  const solved = W.list.filter(x => x.isSolved).length;
+  const week = W.list.filter(x => new Date(x.createdAt) > Date.now() - 7 * 864e5).length;
+
+  let list = W.list;
+  if (W.kw) { const kw = W.kw.toLowerCase(); list = list.filter(x => (x.question && x.question.content.toLowerCase().includes(kw)) || (x.explanation || '').toLowerCase().includes(kw)); }
+  if (W.filter === 'recent') list = list.filter(x => new Date(x.createdAt) > Date.now() - 7 * 864e5);
+  if (W.filter === 'frequent') list = list.filter(x => x.wrongCount >= 3);
+  if (W.filter === 'unsolved') list = list.filter(x => !x.isSolved);
+
+  app.innerHTML = `
+    <div class="stats-hero">
+      <div class="stats-grid" style="margin-top:0;">
+        <div class="item"><span class="num">${total}</span><span class="lbl">总错题</span></div>
+        <div class="item"><span class="num">${solved}</span><span class="lbl">已掌握</span></div>
+        <div class="item"><span class="num">${total - solved}</span><span class="lbl">未掌握</span></div>
+        <div class="item"><span class="num">${week}</span><span class="lbl">本周新增</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <input class="input" id="kwInput" placeholder="搜索错题..." value="${esc(W.kw)}">
+      <div class="filter-bar mt10">
+        ${[['all','全部'],['recent','最近'],['frequent','常错'],['unsolved','未掌握']].map(f => `<span class="filter-chip ${W.filter===f[0]?'active':''}" data-f="${f[0]}">${f[1]}</span>`).join('')}
+      </div>
+      <button class="btn btn-primary" id="retryBtn">错题重练（${list.length}题）</button>
+    </div>
+    ${list.length === 0 ? '<div class="empty"><div class="icon">📝</div><p>暂无错题，完成练习后答错的题会自动收集到这里</p></div>' :
+      list.map(w => `
+      <div class="card wrong-item">
+        <div class="q">${esc(w.question ? w.question.content : '题目已删除')}</div>
+        <div class="wrong-meta">
+          <span class="cnt">错${w.wrongCount}次</span>
+          <span class="st ${w.isSolved ? 'done' : 'todo'}">${w.isSolved ? '已掌握' : '未掌握'}</span>
+          <span class="time">${fmtDate(w.createdAt)}</span>
+        </div>
+        <div class="ans-line"><span class="lb">你的答案：</span><span class="err">${esc(w.userAnswer || '未作答')}</span></div>
+        <div class="ans-line"><span class="lb">正确答案：</span><span class="ok">${esc(w.correctAnswer || '-')}</span></div>
+        ${w.explanation ? `<div class="ans-line"><span class="lb">解析：</span>${esc(w.explanation)}</div>` : ''}
+        <div class="wrong-actions">
+          ${w.isSolved ? '' : `<button class="btn btn-light" data-act="done" data-id="${w.id}">标记已掌握</button>`}
+          <button class="btn btn-danger-light" data-act="del" data-id="${w.id}">删除</button>
+        </div>
+      </div>`).join('')}
+  `;
+
+  document.getElementById('kwInput').oninput = e => { W.kw = e.target.value; renderWrong(app); };
+  app.querySelectorAll('.filter-chip').forEach(c => c.onclick = () => { W.filter = c.dataset.f; renderWrong(app); });
+  document.getElementById('retryBtn').onclick = () => location.hash = '#/practice?mode=wrong';
+
+  app.querySelectorAll('[data-act]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.id;
+    try {
+      if (btn.dataset.act === 'done') {
+        await api('/study/wrong-question/' + id + '/mastered', { method: 'PATCH' });
+        toast('已标记掌握');
+      } else {
+        await api('/study/wrong-question/' + id, { method: 'DELETE' });
+        toast('已删除');
+      }
+      W.list = await api('/study/wrong-questions');
+      renderWrong(app);
+    } catch (e) { toast(e.message); }
+  });
+}
+
+// ================= 我的 =================
+async function profileView(app) {
+  document.getElementById('topTitle').textContent = '我的';
+  document.getElementById('topRight').textContent = '';
+  app.innerHTML = '<div class="text-center" style="padding:60px 0;color:#9CA3AF;">加载中...</div>';
+  let stats = { totalStudyTime:0, continuousStudyDays:0, totalQuestions:0, correctRate:0 };
+  try { stats = Object.assign(stats, await api('/user/stats')); } catch(e){}
+
+  app.innerHTML = `
+    <div class="stats-hero">
+      <div class="name">${esc(USER && USER.nickname || '会计学员')}</div>
+      <div class="sub">${esc(USER && USER.openid || '')}</div>
+      <div class="stats-grid">
+        <div class="item"><span class="num">${Math.floor(stats.totalStudyTime/60)}h${stats.totalStudyTime%60}m</span><span class="lbl">学习时长</span></div>
+        <div class="item"><span class="num">${stats.continuousStudyDays}</span><span class="lbl">连续天数</span></div>
+        <div class="item"><span class="num">${stats.totalQuestions}</span><span class="lbl">答题总数</span></div>
+        <div class="item"><span class="num">${stats.correctRate}%</span><span class="lbl">正确率</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="field"><label>修改昵称</label><input class="input" id="nickInput" value="${esc(USER && USER.nickname || '')}"></div>
+      <button class="btn btn-primary" id="saveNick">保存昵称</button>
+    </div>
+    <button class="btn btn-danger-light" id="logoutBtn">退出登录</button>`;
+
+  document.getElementById('saveNick').onclick = async () => {
+    const nickname = document.getElementById('nickInput').value.trim();
+    if (!nickname) return toast('昵称不能为空');
+    try {
+      const u = await api('/user/profile', { method: 'PATCH', body: JSON.stringify({ nickname }) });
+      USER = Object.assign({}, USER, u);
+      localStorage.setItem('user', JSON.stringify(USER));
+      toast('昵称已更新');
+    } catch (e) { toast(e.message); }
+  };
+  document.getElementById('logoutBtn').onclick = () => { logout(); toast('已退出登录'); location.hash = '#/login'; };
+}
+
+// ================= 初始化 =================
+(function init() {
+  try { USER = JSON.parse(localStorage.getItem('user') || 'null'); } catch(e){ USER = null; }
+  document.getElementById('backBtn').onclick = () => history.back();
+  if (!location.hash) location.hash = '#/login';
+  render();
+})();
+</script>
+</body>
+</html>

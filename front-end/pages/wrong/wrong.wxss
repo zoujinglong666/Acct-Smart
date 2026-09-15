@@ -33,6 +33,18 @@
 
 .search-input { font-size: 28rpx; color: #1F2937; }
 
+.retry-btn {
+  width: 100%;
+  background: #1E40AF;
+  color: #FFFFFF;
+  font-size: 28rpx;
+  padding: 18rpx 0;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.retry-btn::after { border: none; }
+
 .filter-tabs {
   display: flex;
   background: #FFFFFF;
