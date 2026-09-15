@@ -1,137 +1,8 @@
--- AI中级会计助手 数据库初始化脚本（最小 MVP 闭环版）
--- PostgreSQL
--- 说明：字段命名与后端 TypeORM 实体完全对齐（camelCase，加引号）
-
--- 创建用户表
-CREATE TABLE IF NOT EXISTS users (
-    "id" SERIAL PRIMARY KEY,
-    "openid" VARCHAR(255) UNIQUE,
-    "unionid" VARCHAR(255),
-    "username" VARCHAR(255),
-    "password" VARCHAR(255),
-    "nickname" VARCHAR(255),
-    "avatar" TEXT,
-    "gender" VARCHAR(20) DEFAULT 'unknown' CHECK ("gender" IN ('male', 'female', 'unknown')),
-    "phone" VARCHAR(20),
-    "email" VARCHAR(255),
-    "totalStudyTime" INTEGER DEFAULT 0,
-    "continuousStudyDays" INTEGER DEFAULT 0,
-    "lastStudyDate" DATE,
-    "totalQuestions" INTEGER DEFAULT 0,
-    "correctQuestions" INTEGER DEFAULT 0,
-    "preferences" JSONB,
-    "isActive" BOOLEAN DEFAULT true,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建知识点表
-CREATE TABLE IF NOT EXISTS knowledge_points (
-    "id" SERIAL PRIMARY KEY,
-    "title" VARCHAR(255),
-    "content" TEXT NOT NULL,
-    "parentId" INTEGER REFERENCES knowledge_points("id"),
-    "chapterNumber" VARCHAR(50),
-    "sortOrder" INTEGER DEFAULT 0,
-    "importance" VARCHAR(20) DEFAULT 'basic' CHECK ("importance" IN ('basic', 'important', 'difficult')),
-    "tags" JSONB,
-    "studyCount" INTEGER DEFAULT 0,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建题目表
-CREATE TABLE IF NOT EXISTS questions (
-    "id" SERIAL PRIMARY KEY,
-    "content" TEXT NOT NULL,
-    "type" VARCHAR(20) NOT NULL CHECK ("type" IN ('single', 'multiple', 'judge', 'calculation')),
-    "options" JSONB,
-    "correctAnswer" VARCHAR(500) NOT NULL,
-    "explanation" TEXT,
-    "knowledgePointId" INTEGER NOT NULL REFERENCES knowledge_points("id"),
-    "difficulty" VARCHAR(20) DEFAULT 'medium' CHECK ("difficulty" IN ('easy', 'medium', 'hard')),
-    "answerCount" INTEGER DEFAULT 0,
-    "correctCount" INTEGER DEFAULT 0,
-    "tags" JSONB,
-    "isActive" BOOLEAN DEFAULT true,
-    "source" VARCHAR(255),
-    "year" INTEGER,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建学习记录表（答题流水）
-CREATE TABLE IF NOT EXISTS study_records (
-    "id" SERIAL PRIMARY KEY,
-    "userId" INTEGER NOT NULL REFERENCES users("id"),
-    "questionId" INTEGER NOT NULL REFERENCES questions("id"),
-    "userAnswer" VARCHAR(500),
-    "isCorrect" BOOLEAN DEFAULT false,
-    "timeSpent" INTEGER DEFAULT 0,
-    "type" VARCHAR(20) DEFAULT 'practice' CHECK ("type" IN ('practice', 'daily')),
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 创建错题表
-CREATE TABLE IF NOT EXISTS wrong_questions (
-    "id" SERIAL PRIMARY KEY,
-    "userId" INTEGER NOT NULL REFERENCES users("id"),
-    "questionId" INTEGER NOT NULL REFERENCES questions("id"),
-    "userAnswer" VARCHAR(500),
-    "correctAnswer" VARCHAR(500),
-    "explanation" TEXT,
-    "wrongCount" INTEGER DEFAULT 1,
-    "lastWrongTime" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "isMastered" BOOLEAN DEFAULT false,
-    "isSolved" BOOLEAN DEFAULT false,
-    "solvedTime" TIMESTAMP,
-    "wrongReasons" JSONB,
-    "reviewSchedule" JSONB,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE("userId", "questionId")
-);
-
--- 创建索引
-CREATE INDEX IF NOT EXISTS idx_users_openid ON users("openid");
-CREATE INDEX IF NOT EXISTS idx_knowledge_points_parent ON knowledge_points("parentId");
-CREATE INDEX IF NOT EXISTS idx_knowledge_points_chapter ON knowledge_points("chapterNumber");
-CREATE INDEX IF NOT EXISTS idx_questions_knowledge_point ON questions("knowledgePointId");
-CREATE INDEX IF NOT EXISTS idx_questions_type ON questions("type");
-CREATE INDEX IF NOT EXISTS idx_questions_difficulty ON questions("difficulty");
-CREATE INDEX IF NOT EXISTS idx_study_records_user ON study_records("userId");
-CREATE INDEX IF NOT EXISTS idx_study_records_question ON study_records("questionId");
-CREATE INDEX IF NOT EXISTS idx_study_records_created ON study_records("createdAt");
-CREATE INDEX IF NOT EXISTS idx_wrong_questions_user ON wrong_questions("userId");
-CREATE INDEX IF NOT EXISTS idx_wrong_questions_user_question ON wrong_questions("userId", "questionId");
-
--- 插入初始知识点数据
-INSERT INTO knowledge_points ("title", "content", "chapterNumber", "sortOrder", "importance", "tags") VALUES
-('会计概念', '会计是以货币为主要计量单位，运用专门的方法，核算和监督一个单位经济活动的一种经济管理活动。', '1.1', 1, 'important', '["基础概念", "重点"]'),
-('会计职能', '会计具有核算职能和监督职能，核算职能是基本职能，监督职能是重要职能。', '1.2', 2, 'important', '["基础概念", "重点"]'),
-('会计基本假设', '会计主体、持续经营、会计分期、货币计量是会计核算的基本前提。', '1.3', 3, 'important', '["基础概念", "重点"]'),
-('会计信息质量要求', '相关性、可靠性、可理解性、可比性、实质重于形式、重要性、谨慎性、及时性。', '1.4', 4, 'important', '["基础概念", "重点"]'),
-('会计政策', '企业在会计确认、计量和报告中所采用的原则、基础和会计处理方法。', '2.1', 5, 'important', '["会计政策", "重点"]'),
-('会计估计', '企业对其结果不确定的交易或事项以最近可利用的信息为基础所作的判断。', '2.2', 6, 'important', '["会计估计", "重点"]'),
-('前期差错更正', '企业发现前期财务报表存在错误时的处理方法。', '2.3', 7, 'important', '["差错更正", "重点"]'),
-('存货的确认', '存货是指企业在日常活动中持有以备出售的产成品或商品、处在生产过程中的在产品、在生产过程或提供劳务过程中耗用的材料和物料等。', '3.1', 8, 'important', '["存货", "重点"]'),
-('存货的初始计量', '存货应当按照成本进行初始计量。存货成本包括采购成本、加工成本和其他成本。', '3.2', 9, 'important', '["存货", "重点"]'),
-('发出存货的计量', '企业应当采用先进先出法、移动加权平均法、月末一次加权平均法或者个别计价法确定发出存货的实际成本。', '3.3', 10, 'important', '["存货", "重点"]');
-
--- 插入示例题目
-INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanation", "knowledgePointId", "difficulty", "tags") VALUES
-('下列各项中，属于会计信息质量要求的是（）', 'single', '["A. 相关性", "B. 重要性", "C. 谨慎性", "D. 以上都是"]', 'D', '会计信息质量要求包括相关性、可靠性、可理解性、可比性、实质重于形式、重要性、谨慎性和及时性。', 4, 'easy', '["基础题", "概念题"]'),
-('企业购入材料一批，价款10000元，增值税1300元，运杂费500元，该批材料的入账价值为（）元', 'single', '["A. 10000", "B. 10500", "C. 11300", "D. 11800"]', 'B', '材料的入账价值=买价+运杂费=10000+500=10500元，增值税可以抵扣，不计入材料成本。', 9, 'medium', '["计算题", "存货"]'),
-('会计的基本职能包括（）', 'multiple', '["A. 核算职能", "B. 监督职能", "C. 预测职能", "D. 决策职能"]', 'AB', '会计的基本职能是核算职能和监督职能，其中核算职能是基本职能。', 2, 'easy', '["基础题", "概念题"]'),
-('会计主体假设要求企业应当对其本身发生的交易或事项进行会计确认、计量和报告。（）', 'judge', '[]', '正确', '会计主体假设明确了会计核算的空间范围，要求企业只对自身的交易或事项进行会计处理。', 3, 'easy', '["基础题", "判断题"]');
-
--- ============================================================
 -- 官方真题导入：2012年度全国会计专业技术资格考试《中级会计实务》客观题
--- 来源：财政部会计财务评价中心官网 http://kzp.mof.gov.cn（试题+官方答案 PDF）
--- ============================================================
+-- 来源：财政部会计财务评价中心官网 http://kzp.mof.gov.cn（试题+官方答案）
+-- 本脚本可在已初始化数据库上增量执行；全新初始化请合并进 init.sql
 
--- 真题知识点（对应 2012 真题考点）
+-- 1) 新增知识点（对应 2012 真题考点）
 INSERT INTO knowledge_points ("title", "content", "chapterNumber", "sortOrder", "importance", "tags") VALUES
 ('固定资产', '固定资产是指同时具有下列特征的有形资产：为生产商品、提供劳务、出租或经营管理而持有的，使用寿命超过一个会计年度。固定资产折旧、后续支出与减值处理是核心考点。', '4.1', 11, 'important', '["固定资产", "重点"]'),
 ('无形资产', '无形资产是指企业拥有或者控制的没有实物形态的可辨认非货币性资产。使用寿命的确定与摊销是核心考点。', '4.2', 12, 'important', '["无形资产", "重点"]'),
@@ -150,7 +21,7 @@ INSERT INTO knowledge_points ("title", "content", "chapterNumber", "sortOrder", 
 ('合并财务报表', '合并财务报表的编制以个别财务报表为基础，抵销内部交易与内部债权债务是核心考点。', '6.5', 25, 'important', '["合并报表", "难点"]'),
 ('股份支付', '股份支付分为以权益结算和以现金结算两类。等待期内的会计处理、行权时的资本公积结转是核心考点。', '6.6', 26, 'important', '["股份支付", "难点"]');
 
--- 真题：单项选择题（15 题）
+-- 2) 单项选择题（15 题）
 INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanation", "knowledgePointId", "difficulty", "tags", "source", "year") VALUES
 ('下列各项中，属于非货币性资产的是（　　）。', 'single', '["A. 外埠存款", "B. 持有的银行承兑汇票", "C. 拟长期持有的股票投资", "D. 准备持有至到期的债券投资"]', 'C', '非货币性资产是指货币性资产以外的资产。外埠存款、持有的银行承兑汇票、准备持有至到期的债券投资均属于货币性资产；拟长期持有的股票投资属于非货币性资产。', (SELECT id FROM knowledge_points WHERE title='非货币性资产交换'), 'easy', '["真题", "概念题"]', '官方真题-2012', 2012),
 ('2011年7月1日，甲公司将一项按照成本模式进行后续计量的投资性房地产转换为固定资产。该资产转换前的账面原价为4000万元，已计提折旧200万元，已计提减值准备100万元，转换日的公允价值为3850万元。假定不考虑其他因素，转换日甲公司应借记"固定资产"科目的金额为（　　）万元。', 'single', '["A. 3700", "B. 3800", "C. 3850", "D. 4000"]', 'A', '成本模式计量的投资性房地产转换为固定资产，应按账面价值结转：4000－200－100＝3700（万元），不确认转换损益。', (SELECT id FROM knowledge_points WHERE title='投资性房地产'), 'medium', '["真题", "计算题"]', '官方真题-2012', 2012),
@@ -168,7 +39,7 @@ INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanati
 ('在资产负债表日至财务报告批准报出日之间发生的下列事项中，属于资产负债表日后非调整事项的是（　　）。', 'single', '["A. 以资本公积转增股本", "B. 发现了财务报表舞弊", "C. 发现原预计的资产减值损失严重不足", "D. 实际支付的诉讼赔偿额与原预计金额有较大差异"]', 'A', '以资本公积转增股本是资产负债表日后发生的事项，不影响资产负债表日存在状况，属于非调整事项；其余各项均属于调整事项。', (SELECT id FROM knowledge_points WHERE title='资产负债表日后事项'), 'medium', '["真题", "概念题"]', '官方真题-2012', 2012),
 ('下列各项中，应计入其他资本公积但不属于其他综合收益的是（　　）。', 'single', '["A. 溢价发行股票形成的资本公积", "B. 因享有联营企业其他综合收益形成的资本公积", "C. 可供出售金融资产公允价值变动形成的资本公积", "D. 以权益结算的股份支付在等待期内形成的资本公积"]', 'D', '以权益结算的股份支付在等待期内确认的资本公积属于其他资本公积，但不属于其他综合收益。', (SELECT id FROM knowledge_points WHERE title='股份支付'), 'hard', '["真题", "概念题"]', '官方真题-2012', 2012);
 
--- 真题：多项选择题（10 题）
+-- 3) 多项选择题（10 题）
 INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanation", "knowledgePointId", "difficulty", "tags", "source", "year") VALUES
 ('下列各项中，企业在判断存货成本与可变现净值孰低时，可作为存货成本确凿证据的有（　　）。', 'multiple', '["A. 外来原始凭证", "B. 生产成本资料", "C. 生产预算资料", "D. 生产成本账簿记录"]', 'ABD', '生产预算资料属于预算数据，不是存货成本的确凿证据；外来原始凭证、生产成本资料和生产成本账簿记录均属于确凿证据。', (SELECT id FROM knowledge_points WHERE title='存货的确认'), 'easy', '["真题", "概念题"]', '官方真题-2012', 2012),
 ('下列关于固定资产会计处理的表述中，正确的有（　　）。', 'multiple', '["A. 未投入使用的固定资产不应计提折旧", "B. 特定固定资产弃置费用的现值应计入该资产的成本", "C. 融资租入管理用固定资产发生的日常修理费应计入当期损益", "D. 预期通过使用或处置不能产生经济利益的固定资产应予终止确认"]', 'BCD', '未投入使用的固定资产仍应计提折旧，A错误；弃置费用现值计入固定资产成本，B正确；固定资产日常修理费计入当期损益，C正确；预期不能产生经济利益的固定资产应终止确认，D正确。', (SELECT id FROM knowledge_points WHERE title='固定资产'), 'medium', '["真题", "概念题"]', '官方真题-2012', 2012),
@@ -181,7 +52,7 @@ INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanati
 ('下列各项中，表明已售商品所有权上的主要风险和报酬尚未转移给购货方的有（　　）。', 'multiple', '["A. 销售商品的同时，约定日后将以融资租赁方式租回", "B. 销售商品的同时，约定日后将以高于原售价的固定价格回购", "C. 已售商品附有无条件退货条款，但不能合理估计退货的可能性", "D. 向购货方发出商品后，发现商品质量与合同不符，很可能遭受退货"]', 'ABCD', '融资租赁租回、固定价格回购、无条件退货且不能合理估计、质量不符很可能退货，均表明主要风险和报酬尚未转移，四项均正确。', (SELECT id FROM knowledge_points WHERE title='收入确认'), 'medium', '["真题", "概念题"]', '官方真题-2012', 2012),
 ('下列各项中，会引起事业单位年末资产负债表中事业基金总额发生变化的有（　　）。', 'multiple', '["A. 购入国库券", "B. 以银行存款购入固定资产", "C. 提取职工福利基金", "D. 将闲置固定资产对外投资"]', 'BCD', '购入国库券只是货币资金形态的变化，不影响事业基金总额；购入固定资产、提取职工福利基金、将固定资产对外投资均会引起事业基金总额发生变化。', (SELECT id FROM knowledge_points WHERE title='政府与民间非营利组织会计'), 'hard', '["真题", "概念题"]', '官方真题-2012', 2012);
 
--- 真题：判断题（10 题）
+-- 4) 判断题（10 题）
 INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanation", "knowledgePointId", "difficulty", "tags", "source", "year") VALUES
 ('所有者权益体现的是所有者在企业中的剩余权益，其确认和计量主要依赖于资产、负债等其他会计要素的确认和计量。（　　）', 'judge', '[]', '正确', '所有者权益是资产减去负债后的剩余权益，其确认和计量依赖于资产、负债等会计要素的确认和计量。', (SELECT id FROM knowledge_points WHERE title='会计概念'), 'easy', '["真题", "判断题"]', '官方真题-2012', 2012),
 ('已采用公允价值模式计量的投资性房地产，不得从公允价值计量模式转换为成本计量模式。（　　）', 'judge', '[]', '正确', '已采用公允价值模式计量的投资性房地产，不得从公允价值模式转换为成本模式；成本模式可以转为公允价值模式。', (SELECT id FROM knowledge_points WHERE title='投资性房地产'), 'easy', '["真题", "判断题"]', '官方真题-2012', 2012),
@@ -193,19 +64,3 @@ INSERT INTO questions ("content", "type", "options", "correctAnswer", "explanati
 ('企业对境外经营财务报表进行折算时，资产负债表各项目均采用资产负债表日的即期汇率折算，利润表各项目均采用交易发生日的即期汇率或与交易发生日即期汇率近似的汇率折算。（　　）', 'judge', '[]', '错误', '资产负债表中的资产和负债项目采用资产负债表日的即期汇率折算，但所有者权益项目除"未分配利润"项目外，采用发生时的即期汇率折算，并非所有项目均采用资产负债表日即期汇率。', (SELECT id FROM knowledge_points WHERE title='外币折算'), 'medium', '["真题", "判断题"]', '官方真题-2012', 2012),
 ('资产负债表日后事项如涉及现金收支项目，均不调整报告年度资产负债表的货币资金项目和现金流量表各项目数字。（　　）', 'judge', '[]', '正确', '资产负债表日后事项涉及现金收支的，均不调整报告年度资产负债表的货币资金项目和现金流量表正表各项目数字。', (SELECT id FROM knowledge_points WHERE title='资产负债表日后事项'), 'medium', '["真题", "判断题"]', '官方真题-2012', 2012),
 ('民间非营利组织的限定性净资产的限制即使已经解除，也不应当对净资产进行重新分类。（　　）', 'judge', '[]', '错误', '民间非营利组织限定性净资产的限制已经解除的，应当对净资产进行重新分类，将限定性净资产转为非限定性净资产。', (SELECT id FROM knowledge_points WHERE title='政府与民间非营利组织会计'), 'medium', '["真题", "判断题"]', '官方真题-2012', 2012);
-
--- 创建更新时间触发器函数
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW."updatedAt" = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- 为表创建更新时间触发器
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_knowledge_points_updated_at BEFORE UPDATE ON knowledge_points FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_questions_updated_at BEFORE UPDATE ON questions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_study_records_updated_at BEFORE UPDATE ON study_records FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_wrong_questions_updated_at BEFORE UPDATE ON wrong_questions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
